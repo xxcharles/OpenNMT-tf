@@ -96,6 +96,7 @@
             
             
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="training.html">Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="serving.html">Serving</a></li>
@@ -168,7 +169,6 @@
 <span id="install-dependencies"></span><h2>Install dependencies<a class="headerlink" href="#install-dependencies" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install sphinx
 pip install sphinx_rtd_theme
-pip install sphinxcontrib-versioning
 pip install recommonmark
 </pre></div>
 </div>
@@ -183,12 +183,6 @@ sphinx-apidoc -e -M -o docs/package opennmt opennmt/tests
 <div class="section" id="build-locally">
 <span id="build-locally"></span><h2>Build locally<a class="headerlink" href="#build-locally" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs/ <span class="o">&amp;&amp;</span> make html
-</pre></div>
-</div>
-</div>
-<div class="section" id="deploy-manually">
-<span id="deploy-manually"></span><h2>Deploy manually<a class="headerlink" href="#deploy-manually" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sphinx-versioning push docs gh-pages .
 </pre></div>
 </div>
 </div>
