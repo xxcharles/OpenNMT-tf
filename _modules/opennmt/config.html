@@ -211,7 +211,10 @@
       <span class="c1"># Add or update section in main configuration.</span>
       <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">subconfig</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-          <span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">subconfig</span><span class="p">[</span><span class="n">section</span><span class="p">])</span>
+          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">subconfig</span><span class="p">[</span><span class="n">section</span><span class="p">])</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">]</span> <span class="o">=</span> <span class="n">subconfig</span><span class="p">[</span><span class="n">section</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">]</span> <span class="o">=</span> <span class="n">subconfig</span><span class="p">[</span><span class="n">section</span><span class="p">]</span>
 
