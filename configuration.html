@@ -187,7 +187,7 @@
 <span id="parameters"></span><h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
 <p>Parameters are described in separate YAML files. They define data files, optimization settings, dynamic model parameters, and options related to training and inference.</p>
 <p>The command line accepts multiple configuration files so that some parts can be made reusable, e.g:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>python -m bin.main <span class="o">[</span>...<span class="o">]</span> --config config/data/wmt_ende.yml config/run/default_train.yml config/params/adam_with_decay.yml
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python -m bin.main <span class="o">[</span>...<span class="o">]</span> --config config/opennmt-defaults.yml config/optim/adam_with_decay.yml config/data/toy-ende.yml
 </pre></div>
 </div>
 <p>If a configuration key is duplicated, the value defined in the rightmost configuration file has priority.</p>
