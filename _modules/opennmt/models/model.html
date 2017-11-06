@@ -557,12 +557,10 @@
       <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
       <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">repeat</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">PREDICT</span> <span class="ow">or</span> <span class="n">num_buckets</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">num_buckets</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">padded_batch</span><span class="p">(</span>
-          <span class="n">batch_size</span><span class="p">,</span>
-          <span class="n">padded_shapes</span><span class="o">=</span><span class="n">padded_shapes</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># For training and evaluation, use bucketing.</span>
+    <span class="n">num_buckets</span> <span class="o">=</span> <span class="n">num_buckets</span> <span class="ow">or</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span> <span class="ow">and</span> <span class="n">num_buckets</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="c1"># Bucketize training dataset to improve efficiency.</span>
       <span class="k">def</span> <span class="nf">_key_func</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
         <span class="n">length</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -597,6 +595,10 @@
           <span class="n">_key_func</span><span class="p">,</span>
           <span class="n">_reduce_func</span><span class="p">,</span>
           <span class="n">window_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">padded_batch</span><span class="p">(</span>
+          <span class="n">batch_size</span><span class="p">,</span>
+          <span class="n">padded_shapes</span><span class="o">=</span><span class="n">padded_shapes</span><span class="p">)</span>
 
     <span class="n">iterator</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">make_initializable_iterator</span><span class="p">()</span>
 
