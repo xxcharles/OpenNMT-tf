@@ -168,12 +168,10 @@
   <h1>Source code for opennmt.models.sequence_classifier</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Sequence classifier.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
-
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">from</span> <span class="nn">opennmt.models.model</span> <span class="k">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">opennmt.utils.misc</span> <span class="k">import</span> <span class="n">count_lines</span>
+<span class="kn">from</span> <span class="nn">opennmt.utils.misc</span> <span class="k">import</span> <span class="n">count_lines</span><span class="p">,</span> <span class="n">print_bytes</span>
 
 
 <div class="viewcode-block" id="SequenceClassifier"><a class="viewcode-back" href="../../../package/opennmt.models.sequence_classifier.html#opennmt.models.sequence_classifier.SequenceClassifier">[docs]</a><span class="k">class</span> <span class="nc">SequenceClassifier</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
@@ -275,7 +273,7 @@
     <span class="p">}</span>
 
 <div class="viewcode-block" id="SequenceClassifier.print_prediction"><a class="viewcode-back" href="../../../package/opennmt.models.sequence_classifier.html#opennmt.models.sequence_classifier.SequenceClassifier.print_prediction">[docs]</a>  <span class="k">def</span> <span class="nf">print_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">prediction</span><span class="p">[</span><span class="s2">&quot;classes&quot;</span><span class="p">],</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span></div></div>
+    <span class="n">print_bytes</span><span class="p">(</span><span class="n">prediction</span><span class="p">[</span><span class="s2">&quot;classes&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
