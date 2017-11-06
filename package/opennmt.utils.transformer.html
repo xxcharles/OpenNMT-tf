@@ -246,7 +246,7 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 
 <dl class="function">
 <dt id="opennmt.utils.transformer.feed_forward">
-<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">feed_forward</code><span class="sig-paren">(</span><em>x</em>, <em>inner_dim</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#feed_forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.feed_forward" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">feed_forward</code><span class="sig-paren">(</span><em>x</em>, <em>inner_dim</em>, <em>mode</em>, <em>dropout=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#feed_forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.feed_forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implements the Transformer’s “Feed Forward” layer.</p>
 <div class="math">
 \[ffn(x) = max(0, x*W_1 + b_1)*W_2 + b_2\]</div>
@@ -257,6 +257,8 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>x</strong> – The input.</li>
 <li><strong>inner_dim</strong> – The number of units of the inner linear transformation.</li>
+<li><strong>mode</strong> – A <code class="docutils literal"><span class="pre">tf.estimator.ModeKeys</span></code> mode.</li>
+<li><strong>dropout</strong> – The probability to drop units from the inner transformation.</li>
 </ul>
 </td>
 </tr>
@@ -268,9 +270,15 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 </dd></dl>
 
 <dl class="function">
-<dt id="opennmt.utils.transformer.add_and_norm">
-<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">add_and_norm</code><span class="sig-paren">(</span><em>inputs</em>, <em>outputs</em>, <em>mode</em>, <em>dropout=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#add_and_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.add_and_norm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implements the Transformer’s “Add &amp; Norm” layer.</p>
+<dt id="opennmt.utils.transformer.norm">
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">norm</code><span class="sig-paren">(</span><em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Layer normalizes <code class="xref py py-obj docutils literal"><span class="pre">inputs</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opennmt.utils.transformer.drop_and_add">
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">drop_and_add</code><span class="sig-paren">(</span><em>inputs</em>, <em>outputs</em>, <em>mode</em>, <em>dropout=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#drop_and_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.drop_and_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drops units in the outputs and adds the previous values.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

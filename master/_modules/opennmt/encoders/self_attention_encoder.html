@@ -185,8 +185,8 @@
                <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
                <span class="n">ffn_inner_dim</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
                <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-               <span class="n">attention_dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-               <span class="n">keep_layers_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">attention_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+               <span class="n">relu_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
                <span class="n">position_encoder</span><span class="o">=</span><span class="n">PositionEmbedder</span><span class="p">()):</span>
     <span class="sd">&quot;&quot;&quot;Initializes the parameters of the encoder.</span>
 
@@ -197,9 +197,8 @@
 <span class="sd">        in the feed forward layer.</span>
 <span class="sd">      dropout: The probability to drop units from the outputs.</span>
 <span class="sd">      attention_dropout: The probability to drop units from the attention.</span>
-<span class="sd">      keep_layers_output: If ``True``, the memory of the encoder will contain</span>
-<span class="sd">        the output of each layer. Otherwise, it will only contain the</span>
-<span class="sd">        last layer output. This is ``True`` in the Transformer model.</span>
+<span class="sd">      relu_dropout: The probability to drop units from the ReLU activation in</span>
+<span class="sd">        the feed forward layer.</span>
 <span class="sd">      position_encoder: The :class:`opennmt.utils.position.PositionEncoder` to</span>
 <span class="sd">        apply on inputs or ``None``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -208,8 +207,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">ffn_inner_dim</span> <span class="o">=</span> <span class="n">ffn_inner_dim</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">attention_dropout</span> <span class="o">=</span> <span class="n">attention_dropout</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span> <span class="o">=</span> <span class="n">position_encoder</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">keep_layers_output</span> <span class="o">=</span> <span class="n">keep_layers_output</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">relu_dropout</span> <span class="o">=</span> <span class="n">relu_dropout</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span> <span class="o">=</span> <span class="n">position_encoder</span></div>
 
 <div class="viewcode-block" id="SelfAttentionEncoder.encode"><a class="viewcode-back" href="../../../package/opennmt.encoders.self_attention_encoder.html#opennmt.encoders.self_attention_encoder.SelfAttentionEncoder.encode">[docs]</a>  <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">sequence_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -226,23 +225,28 @@
     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_layers</span><span class="p">):</span>
       <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;layer_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">)):</span>
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;multi_head&quot;</span><span class="p">):</span>
+          <span class="n">inputs_norm</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
           <span class="n">context</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">multi_head_attention</span><span class="p">(</span>
               <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span>
-              <span class="n">inputs</span><span class="p">,</span>
-              <span class="n">inputs</span><span class="p">,</span>
-              <span class="n">inputs</span><span class="p">,</span>
+              <span class="n">inputs_norm</span><span class="p">,</span>
+              <span class="n">inputs_norm</span><span class="p">,</span>
+              <span class="n">inputs_norm</span><span class="p">,</span>
               <span class="n">mode</span><span class="p">,</span>
               <span class="n">values_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">,</span>
               <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attention_dropout</span><span class="p">)</span>
-          <span class="n">context</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">add_and_norm</span><span class="p">(</span>
+          <span class="n">context</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">drop_and_add</span><span class="p">(</span>
               <span class="n">inputs</span><span class="p">,</span>
               <span class="n">context</span><span class="p">,</span>
               <span class="n">mode</span><span class="p">,</span>
               <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;ffn&quot;</span><span class="p">):</span>
-          <span class="n">transformed</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">feed_forward</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffn_inner_dim</span><span class="p">)</span>
-          <span class="n">transformed</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">add_and_norm</span><span class="p">(</span>
+          <span class="n">transformed</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">feed_forward</span><span class="p">(</span>
+              <span class="n">transformer</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">context</span><span class="p">),</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">ffn_inner_dim</span><span class="p">,</span>
+              <span class="n">mode</span><span class="p">,</span>
+              <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">relu_dropout</span><span class="p">)</span>
+          <span class="n">transformed</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">drop_and_add</span><span class="p">(</span>
               <span class="n">context</span><span class="p">,</span>
               <span class="n">transformed</span><span class="p">,</span>
               <span class="n">mode</span><span class="p">,</span>
@@ -251,10 +255,8 @@
         <span class="n">inputs</span> <span class="o">=</span> <span class="n">transformed</span>
         <span class="n">state</span> <span class="o">+=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_layers_output</span><span class="p">:</span>
-          <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="n">inputs</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">outputs</span> <span class="k">else</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">)</span></div></div>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

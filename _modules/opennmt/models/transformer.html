@@ -186,7 +186,8 @@
                <span class="n">num_heads</span><span class="p">,</span>
                <span class="n">ffn_inner_dim</span><span class="p">,</span>
                <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-               <span class="n">attention_dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+               <span class="n">attention_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+               <span class="n">relu_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
                <span class="n">position_encoder</span><span class="o">=</span><span class="n">PositionEmbedder</span><span class="p">(),</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;transformer&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initializes a Transformer model.</span>
@@ -202,6 +203,8 @@
 <span class="sd">      ffn_inner_dim: The inner dimension of the feed forward layers.</span>
 <span class="sd">      dropout: The probability to drop units in each layer output.</span>
 <span class="sd">      attention_dropout: The probability to drop units from the attention.</span>
+<span class="sd">      relu_dropout: The probability to drop units from the ReLU activation in</span>
+<span class="sd">        the feed forward layer.</span>
 <span class="sd">      position_encoder: A :class:`opennmt.utils.position.PositionEncoder` to</span>
 <span class="sd">        apply on the inputs.</span>
 <span class="sd">      name: The name of this model.</span>
@@ -212,7 +215,7 @@
         <span class="n">ffn_inner_dim</span><span class="o">=</span><span class="n">ffn_inner_dim</span><span class="p">,</span>
         <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
         <span class="n">attention_dropout</span><span class="o">=</span><span class="n">attention_dropout</span><span class="p">,</span>
-        <span class="n">keep_layers_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">relu_dropout</span><span class="o">=</span><span class="n">relu_dropout</span><span class="p">,</span>
         <span class="n">position_encoder</span><span class="o">=</span><span class="n">position_encoder</span><span class="p">)</span>
     <span class="n">decoder</span> <span class="o">=</span> <span class="n">SelfAttentionDecoder</span><span class="p">(</span>
         <span class="n">num_layers</span><span class="p">,</span>
@@ -220,6 +223,7 @@
         <span class="n">ffn_inner_dim</span><span class="o">=</span><span class="n">ffn_inner_dim</span><span class="p">,</span>
         <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
         <span class="n">attention_dropout</span><span class="o">=</span><span class="n">attention_dropout</span><span class="p">,</span>
+        <span class="n">relu_dropout</span><span class="o">=</span><span class="n">relu_dropout</span><span class="p">,</span>
         <span class="n">position_encoder</span><span class="o">=</span><span class="n">position_encoder</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">(</span><span class="n">Transformer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
