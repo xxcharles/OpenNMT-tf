@@ -314,7 +314,8 @@
 <span class="sd">    tokens: A sequence of tokens.</span>
 
 <span class="sd">  Returns:</span>
-<span class="sd">    A ``tf.Tensor`` of shape ``[sequence_length, max_word_length]``.</span>
+<span class="sd">    The characters as a ``tf.Tensor`` of shape</span>
+<span class="sd">    ``[sequence_length, max_word_length]`` and the length of each word.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">_split_chars</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">):</span>
@@ -328,9 +329,9 @@
 
   <span class="c1"># Get the length of each token.</span>
   <span class="n">lengths</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span>
-      <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">_string_len</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">]),</span>
+      <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">_string_len</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
       <span class="n">tokens</span><span class="p">,</span>
-      <span class="n">dtype</span><span class="o">=</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">],</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
       <span class="n">back_prop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
   <span class="n">max_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
@@ -349,7 +350,7 @@
       <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span>
       <span class="n">back_prop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">chars</span></div>
+  <span class="k">return</span> <span class="n">chars</span><span class="p">,</span> <span class="n">lengths</span></div>
 
 
 <div class="viewcode-block" id="TextInputter"><a class="viewcode-back" href="../../../package/opennmt.inputters.text_inputter.html#opennmt.inputters.text_inputter.TextInputter">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
@@ -584,7 +585,7 @@
 
     <span class="k">if</span> <span class="s2">&quot;char_ids&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
       <span class="n">tokens</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;tokens&quot;</span><span class="p">]</span>
-      <span class="n">chars</span> <span class="o">=</span> <span class="n">tokens_to_chars</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+      <span class="n">chars</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tokens_to_chars</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
       <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">chars</span><span class="p">)</span>
 
       <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_data_field</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;char_ids&quot;</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">padded_shape</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
