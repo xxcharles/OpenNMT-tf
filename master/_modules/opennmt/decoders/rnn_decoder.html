@@ -327,6 +327,7 @@
 
     <span class="c1"># Make shape consistent with beam search.</span>
     <span class="n">predicted_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">log_probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">log_probs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">predicted_ids</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">)</span></div>
