@@ -241,6 +241,7 @@
 <div class="viewcode-block" id="load_pretrained_embeddings"><a class="viewcode-back" href="../../../package/opennmt.inputters.text_inputter.html#opennmt.inputters.text_inputter.load_pretrained_embeddings">[docs]</a><span class="k">def</span> <span class="nf">load_pretrained_embeddings</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">,</span>
                                <span class="n">vocabulary_file</span><span class="p">,</span>
                                <span class="n">num_oov_buckets</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">with_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                <span class="n">case_insensitive_embeddings</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Returns pretrained embeddings relative to the vocabulary.</span>
 
@@ -248,6 +249,16 @@
 
 <span class="sd">  .. code-block:: text</span>
 
+<span class="sd">      word1 val1 val2 ... valM</span>
+<span class="sd">      word2 val1 val2 ... valM</span>
+<span class="sd">      ...</span>
+<span class="sd">      wordN val1 val2 ... valM</span>
+
+<span class="sd">  or if :obj:`with_header` is ``True``:</span>
+
+<span class="sd">  .. code-block:: text</span>
+
+<span class="sd">      N M</span>
 <span class="sd">      word1 val1 val2 ... valM</span>
 <span class="sd">      word2 val1 val2 ... valM</span>
 <span class="sd">      ...</span>
@@ -268,6 +279,8 @@
 <span class="sd">      :obj:`vocabulary_file`.</span>
 <span class="sd">    vocabulary_file: The vocabulary file containing one word per line.</span>
 <span class="sd">    num_oov_buckets: The number of additional unknown tokens.</span>
+<span class="sd">    with_header: ``True`` if the embedding file starts with the line</span>
+<span class="sd">      ``&lt;vocab_size&gt; &lt;embedding_size&gt;``.</span>
 <span class="sd">    case_insensitive_embeddings: ``True`` if embeddings are trained on lowercase</span>
 <span class="sd">      data.</span>
 
@@ -288,6 +301,9 @@
   <span class="c1"># Fill pretrained embedding matrix.</span>
   <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">embedding</span><span class="p">:</span>
     <span class="n">pretrained</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">with_header</span><span class="p">:</span>
+      <span class="nb">next</span><span class="p">(</span><span class="n">embedding</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">embedding</span><span class="p">:</span>
       <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
@@ -404,6 +420,7 @@
                <span class="n">vocabulary_file_key</span><span class="p">,</span>
                <span class="n">embedding_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">embedding_file_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">embedding_file_with_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">case_insensitive_embeddings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
@@ -416,6 +433,8 @@
 <span class="sd">      embedding_size: The size of the resulting embedding.</span>
 <span class="sd">        If ``None``, an embedding file must be provided.</span>
 <span class="sd">      embedding_file_key: The data configuration key of the embedding file.</span>
+<span class="sd">      with_header: ``True`` if the embedding file starts with the line</span>
+<span class="sd">        ``&lt;vocab_size&gt; &lt;embedding_size&gt;``.</span>
 <span class="sd">      case_insensitive_embeddings: ``True`` if embeddings are trained on</span>
 <span class="sd">        lowercase data.</span>
 <span class="sd">      trainable: If ``False``, do not optimize embeddings.</span>
@@ -436,6 +455,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary_file_key</span> <span class="o">=</span> <span class="n">vocabulary_file_key</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">embedding_size</span> <span class="o">=</span> <span class="n">embedding_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">embedding_file_key</span> <span class="o">=</span> <span class="n">embedding_file_key</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">embedding_file_with_header</span> <span class="o">=</span> <span class="n">embedding_file_with_header</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">case_insensitive_embeddings</span> <span class="o">=</span> <span class="n">case_insensitive_embeddings</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="n">trainable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
@@ -500,6 +520,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">embedding_file</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary_file</span><span class="p">,</span>
             <span class="n">num_oov_buckets</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_oov_buckets</span><span class="p">,</span>
+            <span class="n">with_header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">embedding_file_with_header</span><span class="p">,</span>
             <span class="n">case_insensitive_embeddings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">case_insensitive_embeddings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">embedding_size</span> <span class="o">=</span> <span class="n">pretrained</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
