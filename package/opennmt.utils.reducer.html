@@ -188,6 +188,12 @@
 <span id="opennmt-utils-reducer-module"></span><h1>opennmt.utils.reducer module<a class="headerlink" href="#module-opennmt.utils.reducer" title="Permalink to this headline">¶</a></h1>
 <p>Define reducers: objects that merge inputs.</p>
 <dl class="function">
+<dt id="opennmt.utils.reducer.pad_in_time">
+<code class="descclassname">opennmt.utils.reducer.</code><code class="descname">pad_in_time</code><span class="sig-paren">(</span><em>x</em>, <em>padding_length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/reducer.html#pad_in_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.reducer.pad_in_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to pad a tensor in the time dimension and retain the static depth dimension.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="opennmt.utils.reducer.pad_with_identity">
 <code class="descclassname">opennmt.utils.reducer.</code><code class="descname">pad_with_identity</code><span class="sig-paren">(</span><em>x</em>, <em>sequence_length</em>, <em>max_sequence_length</em>, <em>identity_values=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/reducer.html#pad_with_identity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.reducer.pad_with_identity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pads a tensor with identity values up to <code class="xref py py-obj docutils literal"><span class="pre">max_sequence_length</span></code>.</p>
