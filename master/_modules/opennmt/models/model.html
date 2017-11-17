@@ -543,6 +543,9 @@
       <span class="n">padded_shapes_fn</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span>
           <span class="n">feat_padded_shapes_fn</span><span class="p">(),</span> <span class="n">labels_padded_shapes_fn</span><span class="p">())</span>
 
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">:</span>
+      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
+
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
         <span class="n">process_fn</span><span class="p">,</span>
         <span class="n">num_parallel_calls</span><span class="o">=</span><span class="n">num_parallel_process_calls</span><span class="p">)</span><span class="o">.</span><span class="n">prefetch</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">)</span>
@@ -554,8 +557,6 @@
           <span class="n">labels</span><span class="p">,</span>
           <span class="n">maximum_features_length</span><span class="o">=</span><span class="n">maximum_features_length</span><span class="p">,</span>
           <span class="n">maximum_labels_length</span><span class="o">=</span><span class="n">maximum_labels_length</span><span class="p">))</span>
-      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
-      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">repeat</span><span class="p">()</span>
 
     <span class="n">num_buckets</span> <span class="o">=</span> <span class="n">num_buckets</span> <span class="ow">or</span> <span class="mi">1</span>
 
@@ -599,6 +600,9 @@
       <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">padded_batch</span><span class="p">(</span>
           <span class="n">batch_size</span><span class="p">,</span>
           <span class="n">padded_shapes</span><span class="o">=</span><span class="n">padded_shapes</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">:</span>
+      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">repeat</span><span class="p">()</span>
 
     <span class="n">iterator</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">make_initializable_iterator</span><span class="p">()</span>
 
