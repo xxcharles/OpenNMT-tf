@@ -236,13 +236,13 @@ output.</li>
 
 <dl class="class">
 <dt id="opennmt.decoders.rnn_decoder.AttentionalRNNDecoder">
-<em class="property">class </em><code class="descclassname">opennmt.decoders.rnn_decoder.</code><code class="descname">AttentionalRNNDecoder</code><span class="sig-paren">(</span><em>num_layers</em>, <em>num_units</em>, <em>bridge=None</em>, <em>attention_mechanism_class=&lt;class 'tensorflow.contrib.seq2seq.python.ops.attention_wrapper.LuongAttention'&gt;</em>, <em>cell_class=&lt;class 'tensorflow.python.ops.rnn_cell_impl.LSTMCell'&gt;</em>, <em>dropout=0.3</em>, <em>residual_connections=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/decoders/rnn_decoder.html#AttentionalRNNDecoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.decoders.rnn_decoder.AttentionalRNNDecoder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">opennmt.decoders.rnn_decoder.</code><code class="descname">AttentionalRNNDecoder</code><span class="sig-paren">(</span><em>num_layers</em>, <em>num_units</em>, <em>bridge=None</em>, <em>attention_mechanism_class=&lt;class 'tensorflow.contrib.seq2seq.python.ops.attention_wrapper.LuongAttention'&gt;</em>, <em>output_is_attention=True</em>, <em>cell_class=&lt;class 'tensorflow.python.ops.rnn_cell_impl.LSTMCell'&gt;</em>, <em>dropout=0.3</em>, <em>residual_connections=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/decoders/rnn_decoder.html#AttentionalRNNDecoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.decoders.rnn_decoder.AttentionalRNNDecoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#opennmt.decoders.rnn_decoder.RNNDecoder" title="opennmt.decoders.rnn_decoder.RNNDecoder"><code class="xref py py-class docutils literal"><span class="pre">opennmt.decoders.rnn_decoder.RNNDecoder</span></code></a></p>
 <p>A RNN decoder with attention.</p>
 <p>It simple overrides the cell construction to add an attention wrapper.</p>
 <dl class="method">
 <dt id="opennmt.decoders.rnn_decoder.AttentionalRNNDecoder.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>num_layers</em>, <em>num_units</em>, <em>bridge=None</em>, <em>attention_mechanism_class=&lt;class 'tensorflow.contrib.seq2seq.python.ops.attention_wrapper.LuongAttention'&gt;</em>, <em>cell_class=&lt;class 'tensorflow.python.ops.rnn_cell_impl.LSTMCell'&gt;</em>, <em>dropout=0.3</em>, <em>residual_connections=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/decoders/rnn_decoder.html#AttentionalRNNDecoder.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.decoders.rnn_decoder.AttentionalRNNDecoder.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>num_layers</em>, <em>num_units</em>, <em>bridge=None</em>, <em>attention_mechanism_class=&lt;class 'tensorflow.contrib.seq2seq.python.ops.attention_wrapper.LuongAttention'&gt;</em>, <em>output_is_attention=True</em>, <em>cell_class=&lt;class 'tensorflow.python.ops.rnn_cell_impl.LSTMCell'&gt;</em>, <em>dropout=0.3</em>, <em>residual_connections=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/decoders/rnn_decoder.html#AttentionalRNNDecoder.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.decoders.rnn_decoder.AttentionalRNNDecoder.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes the decoder parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -257,6 +257,9 @@ to the decoder.</li>
 <code class="docutils literal"><span class="pre">tf.contrib.seq2seq.AttentionMechanism</span></code> or a callable that takes
 <code class="docutils literal"><span class="pre">(num_units,</span> <span class="pre">memory,</span> <span class="pre">memory_sequence_length)</span></code> as arguments and returns
 a <code class="docutils literal"><span class="pre">tf.contrib.seq2seq.AttentionMechanism</span></code>.</li>
+<li><strong>output_is_attention</strong> – If <code class="docutils literal"><span class="pre">True</span></code>, the final decoder output (before logits)
+is the output of the attention layer. In all cases, the output of the
+attention layer is passed to the next step.</li>
 <li><strong>cell_class</strong> – The inner cell class or a callable taking <code class="xref py py-obj docutils literal"><span class="pre">num_units</span></code> as
 argument and returning a cell.</li>
 <li><strong>dropout</strong> – The probability to drop units in each layer output.</li>
