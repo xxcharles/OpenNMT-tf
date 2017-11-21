@@ -171,12 +171,98 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 
+<div class="viewcode-block" id="tile_sequence_length"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.tile_sequence_length">[docs]</a><span class="k">def</span> <span class="nf">tile_sequence_length</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Tiles lengths :obj:`num_heads` times.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    sequence_length: The sequence length.</span>
+<span class="sd">    num_heads: The number of heads.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A ``tf.Tensor`` where each length is replicated :obj:`num_heads` times.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="p">[</span><span class="n">num_heads</span><span class="p">])</span>
+  <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="p">[</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+  <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+  <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">sequence_length</span></div>
+
+<div class="viewcode-block" id="build_sequence_mask"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.build_sequence_mask">[docs]</a><span class="k">def</span> <span class="nf">build_sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Builds the dot product mask.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    sequence_length: The sequence length.</span>
+<span class="sd">    num_heads: The number of heads.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A broadcastable float ``tf.Tensor`` of shape</span>
+<span class="sd">    ``[batch_size, num_heads, 1, max_length]``.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">num_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tile_sequence_length</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
+  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">num_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">2</span><span class="p">]])</span>
+  <span class="k">return</span> <span class="n">mask</span></div>
+
+<div class="viewcode-block" id="build_future_mask"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.build_future_mask">[docs]</a><span class="k">def</span> <span class="nf">build_future_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Builds the dot product mask for future positions.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    sequence_length: The sequence length.</span>
+<span class="sd">    num_heads: The number of heads.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A float ``tf.Tensor`` of shape</span>
+<span class="sd">    ``[batch_size, num_heads, max_length, max_length]``.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">num_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tile_sequence_length</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
+  <span class="n">max_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
+  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span>
+      <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span>
+          <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">max_length</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
+          <span class="n">maxlen</span><span class="o">=</span><span class="n">max_length</span><span class="p">,</span>
+          <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+      <span class="n">sequence_length</span><span class="p">,</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">num_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">2</span><span class="p">]])</span>
+  <span class="k">return</span> <span class="n">mask</span></div>
+
+<div class="viewcode-block" id="split_heads"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.split_heads">[docs]</a><span class="k">def</span> <span class="nf">split_heads</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Splits a tensor in depth.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    inputs: A ``tf.Tensor`` of shape :math:`[B, T, D]`.</span>
+<span class="sd">    num_heads: The number of heads :math:`H`.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A ``tf.Tensor`` of shape :math:`[B, H, T, D / H]`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+  <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">inputs</span></div>
+
+<div class="viewcode-block" id="combine_heads"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.combine_heads">[docs]</a><span class="k">def</span> <span class="nf">combine_heads</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Concatenates heads.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    inputs: A ``tf.Tensor`` of shape :math:`[B, H, T, D]`.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A ``tf.Tensor`` of shape :math:`[B, T, D * H]`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">perm</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+  <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">inputs</span></div>
+
 <div class="viewcode-block" id="scaled_dot_attention"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.scaled_dot_attention">[docs]</a><span class="k">def</span> <span class="nf">scaled_dot_attention</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span>
                          <span class="n">keys</span><span class="p">,</span>
                          <span class="n">values</span><span class="p">,</span>
                          <span class="n">mode</span><span class="p">,</span>
-                         <span class="n">values_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">mask_future</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Computes the scaled dot-product attention as described</span>
 <span class="sd">  in https://arxiv.org/abs/1706.03762.</span>
@@ -187,8 +273,7 @@
 <span class="sd">      :math:`[B, T_2, ...]`.</span>
 <span class="sd">    values: The sequence to attend. A tensor of shape :math:`[B, T_2, ...]`.</span>
 <span class="sd">    mode: A ``tf.estimator.ModeKeys`` mode.</span>
-<span class="sd">    values_length: The length of the values to attend.</span>
-<span class="sd">    mask_future: Mask attention to future positions.</span>
+<span class="sd">    mask: A float ``tf.Tensor`` applied to the dot product.</span>
 <span class="sd">    dropout: The probability to drop units from the inputs.</span>
 
 <span class="sd">  Returns:</span>
@@ -198,25 +283,7 @@
   <span class="n">dot</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">transpose_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
   <span class="n">dot</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">dot</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">keys</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)))</span>
 
-  <span class="k">if</span> <span class="n">values_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="c1"># Give no weight to illegal connections.</span>
-    <span class="k">if</span> <span class="n">mask_future</span><span class="p">:</span>
-      <span class="c1"># When masking the future, a position can only attend to previous timesteps.</span>
-      <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span>
-          <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span>
-              <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
-              <span class="n">maxlen</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
-              <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-          <span class="n">values_length</span><span class="p">,</span>
-          <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># Otherwise, simply prevent attention on out-of-range positions.</span>
-      <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span>
-          <span class="n">values_length</span><span class="p">,</span>
-          <span class="n">maxlen</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
-          <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-      <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
+  <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">dot</span> <span class="o">=</span> <span class="n">dot</span> <span class="o">*</span> <span class="n">mask</span> <span class="o">+</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">mask</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
 
   <span class="c1"># Compute attention weights.</span>
@@ -234,11 +301,10 @@
 
 <div class="viewcode-block" id="multi_head_attention"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.multi_head_attention">[docs]</a><span class="k">def</span> <span class="nf">multi_head_attention</span><span class="p">(</span><span class="n">num_heads</span><span class="p">,</span>
                          <span class="n">queries</span><span class="p">,</span>
-                         <span class="n">keys</span><span class="p">,</span>
-                         <span class="n">values</span><span class="p">,</span>
+                         <span class="n">memory</span><span class="p">,</span>
                          <span class="n">mode</span><span class="p">,</span>
-                         <span class="n">values_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">mask_future</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Computes the multi-head attention as described in</span>
 <span class="sd">  https://arxiv.org/abs/1706.03762.</span>
@@ -246,46 +312,46 @@
 <span class="sd">  Args:</span>
 <span class="sd">    num_heads: The number of attention heads.</span>
 <span class="sd">    queries: The sequence of queries. A tensor of shape :math:`[B, T_1, ...]`.</span>
-<span class="sd">    keys: The sequence use to calculate attention scores. A tensor of shape</span>
-<span class="sd">      :math:`[B, T_2, ...]`.</span>
-<span class="sd">    values: The sequence to attend. A tensor of shape :math:`[B, T_2, ...]`.</span>
+<span class="sd">    memory: The sequence to attend. A tensor of shape :math:`[B, T_2, ...]`.</span>
 <span class="sd">    mode: A ``tf.estimator.ModeKeys`` mode.</span>
-<span class="sd">    values_length: The length of the values to attend.</span>
-<span class="sd">    mask_future: Mask attention to future positions.</span>
+<span class="sd">    mask: A float ``tf.Tensor`` applied to the dot product.</span>
+<span class="sd">    cache: A dictionary containing pre-projected keys and values.</span>
 <span class="sd">    dropout: The probability to drop units from the inputs.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    The concatenated attention context of each head.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">input_dim</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">input_dim</span> <span class="o">=</span> <span class="n">queries</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
   <span class="k">if</span> <span class="n">input_dim</span> <span class="o">%</span> <span class="n">num_heads</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multi head attention requires the input dimension to be a&quot;</span>
                      <span class="s2">&quot; multiple of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_heads</span><span class="p">))</span>
 
-  <span class="n">head_dim</span> <span class="o">=</span> <span class="n">input_dim</span> <span class="o">/</span> <span class="n">num_heads</span>
-  <span class="n">heads</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">queries</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">memory</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="n">input_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">keys</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="p">[</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_heads</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;head_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)):</span>
-      <span class="c1"># Project queries, keys and values to different and smaller subspaces.</span>
-      <span class="n">queries_proj</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">head_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-      <span class="n">keys_proj</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">head_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-      <span class="n">values_proj</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">head_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">cache</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">],</span> <span class="n">keys</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">cache</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">],</span> <span class="n">values</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">cache</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
+    <span class="n">cache</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>
 
-      <span class="n">head_i</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">scaled_dot_attention</span><span class="p">(</span>
-          <span class="n">queries_proj</span><span class="p">,</span>
-          <span class="n">keys_proj</span><span class="p">,</span>
-          <span class="n">values_proj</span><span class="p">,</span>
-          <span class="n">mode</span><span class="p">,</span>
-          <span class="n">values_length</span><span class="o">=</span><span class="n">values_length</span><span class="p">,</span>
-          <span class="n">mask_future</span><span class="o">=</span><span class="n">mask_future</span><span class="p">,</span>
-          <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
+  <span class="n">queries</span> <span class="o">=</span> <span class="n">split_heads</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
+  <span class="n">keys</span> <span class="o">=</span> <span class="n">split_heads</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
+  <span class="n">values</span> <span class="o">=</span> <span class="n">split_heads</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
 
-      <span class="n">heads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">head_i</span><span class="p">)</span>
+  <span class="n">heads</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">scaled_dot_attention</span><span class="p">(</span>
+      <span class="n">queries</span><span class="p">,</span>
+      <span class="n">keys</span><span class="p">,</span>
+      <span class="n">values</span><span class="p">,</span>
+      <span class="n">mode</span><span class="p">,</span>
+      <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+      <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>
 
   <span class="c1"># Concatenate all heads output.</span>
-  <span class="n">combined</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">heads</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+  <span class="n">combined</span> <span class="o">=</span> <span class="n">combine_heads</span><span class="p">(</span><span class="n">heads</span><span class="p">)</span>
+  <span class="n">combined</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">))</span>
   <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">combined</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">outputs</span></div>

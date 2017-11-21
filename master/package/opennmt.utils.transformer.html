@@ -188,8 +188,110 @@
 <span id="opennmt-utils-transformer-module"></span><h1>opennmt.utils.transformer module<a class="headerlink" href="#module-opennmt.utils.transformer" title="Permalink to this headline">¶</a></h1>
 <p>Define functions related to the Google’s Transformer model.</p>
 <dl class="function">
+<dt id="opennmt.utils.transformer.tile_sequence_length">
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">tile_sequence_length</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>num_heads</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#tile_sequence_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.tile_sequence_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tiles lengths <code class="xref py py-obj docutils literal"><span class="pre">num_heads</span></code> times.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sequence_length</strong> – The sequence length.</li>
+<li><strong>num_heads</strong> – The number of heads.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> where each length is replicated <code class="xref py py-obj docutils literal"><span class="pre">num_heads</span></code> times.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="opennmt.utils.transformer.build_sequence_mask">
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">build_sequence_mask</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>num_heads=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#build_sequence_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.build_sequence_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the dot product mask.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sequence_length</strong> – The sequence length.</li>
+<li><strong>num_heads</strong> – The number of heads.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A broadcastable float <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape
+<code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">num_heads,</span> <span class="pre">1,</span> <span class="pre">max_length]</span></code>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="opennmt.utils.transformer.build_future_mask">
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">build_future_mask</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>num_heads=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#build_future_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.build_future_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the dot product mask for future positions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sequence_length</strong> – The sequence length.</li>
+<li><strong>num_heads</strong> – The number of heads.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A float <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape
+<code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">num_heads,</span> <span class="pre">max_length,</span> <span class="pre">max_length]</span></code>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="opennmt.utils.transformer.split_heads">
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">split_heads</code><span class="sig-paren">(</span><em>inputs</em>, <em>num_heads</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#split_heads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.split_heads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits a tensor in depth.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inputs</strong> – A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, T, D]\)</span>.</li>
+<li><strong>num_heads</strong> – The number of heads <span class="math">\(H\)</span>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, H, T, D / H]\)</span>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="opennmt.utils.transformer.combine_heads">
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">combine_heads</code><span class="sig-paren">(</span><em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#combine_heads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.combine_heads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenates heads.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> – A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, H, T, D]\)</span>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, T, D * H]\)</span>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="opennmt.utils.transformer.scaled_dot_attention">
-<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">scaled_dot_attention</code><span class="sig-paren">(</span><em>queries</em>, <em>keys</em>, <em>values</em>, <em>mode</em>, <em>values_length=None</em>, <em>mask_future=False</em>, <em>dropout=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#scaled_dot_attention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.scaled_dot_attention" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">scaled_dot_attention</code><span class="sig-paren">(</span><em>queries</em>, <em>keys</em>, <em>values</em>, <em>mode</em>, <em>mask=None</em>, <em>dropout=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#scaled_dot_attention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.scaled_dot_attention" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the scaled dot-product attention as described
 in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -202,8 +304,7 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 <span class="math">\([B, T_2, ...]\)</span>.</li>
 <li><strong>values</strong> – The sequence to attend. A tensor of shape <span class="math">\([B, T_2, ...]\)</span>.</li>
 <li><strong>mode</strong> – A <code class="docutils literal"><span class="pre">tf.estimator.ModeKeys</span></code> mode.</li>
-<li><strong>values_length</strong> – The length of the values to attend.</li>
-<li><strong>mask_future</strong> – Mask attention to future positions.</li>
+<li><strong>mask</strong> – A float <code class="docutils literal"><span class="pre">tf.Tensor</span></code> applied to the dot product.</li>
 <li><strong>dropout</strong> – The probability to drop units from the inputs.</li>
 </ul>
 </td>
@@ -217,7 +318,7 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 
 <dl class="function">
 <dt id="opennmt.utils.transformer.multi_head_attention">
-<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">multi_head_attention</code><span class="sig-paren">(</span><em>num_heads</em>, <em>queries</em>, <em>keys</em>, <em>values</em>, <em>mode</em>, <em>values_length=None</em>, <em>mask_future=False</em>, <em>dropout=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#multi_head_attention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.multi_head_attention" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">multi_head_attention</code><span class="sig-paren">(</span><em>num_heads</em>, <em>queries</em>, <em>memory</em>, <em>mode</em>, <em>mask=None</em>, <em>cache=None</em>, <em>dropout=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#multi_head_attention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.multi_head_attention" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the multi-head attention as described in
 <a class="reference external" href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -227,12 +328,10 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>num_heads</strong> – The number of attention heads.</li>
 <li><strong>queries</strong> – The sequence of queries. A tensor of shape <span class="math">\([B, T_1, ...]\)</span>.</li>
-<li><strong>keys</strong> – The sequence use to calculate attention scores. A tensor of shape
-<span class="math">\([B, T_2, ...]\)</span>.</li>
-<li><strong>values</strong> – The sequence to attend. A tensor of shape <span class="math">\([B, T_2, ...]\)</span>.</li>
+<li><strong>memory</strong> – The sequence to attend. A tensor of shape <span class="math">\([B, T_2, ...]\)</span>.</li>
 <li><strong>mode</strong> – A <code class="docutils literal"><span class="pre">tf.estimator.ModeKeys</span></code> mode.</li>
-<li><strong>values_length</strong> – The length of the values to attend.</li>
-<li><strong>mask_future</strong> – Mask attention to future positions.</li>
+<li><strong>mask</strong> – A float <code class="docutils literal"><span class="pre">tf.Tensor</span></code> applied to the dot product.</li>
+<li><strong>cache</strong> – A dictionary containing pre-projected keys and values.</li>
 <li><strong>dropout</strong> – The probability to drop units from the inputs.</li>
 </ul>
 </td>

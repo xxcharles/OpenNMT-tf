@@ -211,32 +211,83 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">relu_dropout</span> <span class="o">=</span> <span class="n">relu_dropout</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span> <span class="o">=</span> <span class="n">position_encoder</span></div>
 
+  <span class="k">def</span> <span class="nf">_init_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="n">memory_sequence_length</span><span class="p">):</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="n">memory</span><span class="p">,</span>
+        <span class="s2">&quot;memory_sequence_length&quot;</span><span class="p">:</span> <span class="n">memory_sequence_length</span>
+    <span class="p">}</span>
+
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">memory</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">memory</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_layers</span><span class="p">):</span>
+      <span class="n">keys</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">depth</span><span class="p">])</span>
+      <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">depth</span><span class="p">])</span>
+
+      <span class="c1"># Ensure shape invariance for tf.while_loop.</span>
+      <span class="n">keys</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="p">])</span>  <span class="c1"># pylint: disable=protected-access</span>
+      <span class="n">values</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="p">])</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+      <span class="n">cache</span><span class="p">[</span><span class="s2">&quot;layer_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
+          <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">keys</span><span class="p">,</span>
+          <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">values</span>
+      <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">cache</span>
+
+  <span class="k">def</span> <span class="nf">_symbols_to_logits_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embedding</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+    <span class="n">embedding_fn</span> <span class="o">=</span> <span class="n">get_embedding_fn</span><span class="p">(</span><span class="n">embedding</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_impl</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+      <span class="n">inputs</span> <span class="o">=</span> <span class="n">embedding_fn</span><span class="p">(</span><span class="n">ids</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:])</span>
+      <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span><span class="o">.</span><span class="n">apply_one</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_self_attention_stack</span><span class="p">(</span>
+          <span class="n">inputs</span><span class="p">,</span>
+          <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+          <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+          <span class="n">memory</span><span class="o">=</span><span class="n">cache</span><span class="p">[</span><span class="s2">&quot;memory&quot;</span><span class="p">],</span>
+          <span class="n">memory_sequence_length</span><span class="o">=</span><span class="n">cache</span><span class="p">[</span><span class="s2">&quot;memory_sequence_length&quot;</span><span class="p">])</span>
+      <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span>
+      <span class="n">logits</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">logits</span><span class="p">,</span> <span class="n">cache</span>
+
+    <span class="k">return</span> <span class="n">_impl</span>
+
   <span class="k">def</span> <span class="nf">_self_attention_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                             <span class="n">inputs</span><span class="p">,</span>
-                            <span class="n">sequence_length</span><span class="p">,</span>
+                            <span class="n">sequence_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">,</span>
+                            <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">memory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">memory_sequence_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">sequence_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">)</span>
-
     <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span>
         <span class="n">inputs</span><span class="p">,</span>
         <span class="n">rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span>
         <span class="n">training</span><span class="o">=</span><span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
 
+    <span class="n">decoder_mask</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">memory_mask</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">sequence_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">decoder_mask</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">build_future_mask</span><span class="p">(</span>
+          <span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">memory_sequence_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">memory_mask</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">build_sequence_mask</span><span class="p">(</span>
+          <span class="n">memory_sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_layers</span><span class="p">):</span>
-      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;layer_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">)):</span>
+      <span class="n">layer_name</span> <span class="o">=</span> <span class="s2">&quot;layer_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+      <span class="n">layer_cache</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="n">layer_name</span><span class="p">]</span> <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">layer_name</span><span class="p">):</span>
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;masked_multi_head&quot;</span><span class="p">):</span>
           <span class="n">inputs_norm</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
           <span class="n">encoded</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">multi_head_attention</span><span class="p">(</span>
               <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span>
               <span class="n">inputs_norm</span><span class="p">,</span>
               <span class="n">inputs_norm</span><span class="p">,</span>
-              <span class="n">inputs_norm</span><span class="p">,</span>
               <span class="n">mode</span><span class="p">,</span>
-              <span class="n">values_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">,</span>
-              <span class="n">mask_future</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">mask</span><span class="o">=</span><span class="n">decoder_mask</span><span class="p">,</span>
+              <span class="n">cache</span><span class="o">=</span><span class="n">layer_cache</span><span class="p">,</span>
               <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attention_dropout</span><span class="p">)</span>
           <span class="n">encoded</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">drop_and_add</span><span class="p">(</span>
               <span class="n">inputs</span><span class="p">,</span>
@@ -244,23 +295,20 @@
               <span class="n">mode</span><span class="p">,</span>
               <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;multi_head&quot;</span><span class="p">):</span>
-          <span class="n">values</span> <span class="o">=</span> <span class="n">memory</span> <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">encoded</span>
-          <span class="n">keys</span> <span class="o">=</span> <span class="n">values</span>
-
-          <span class="n">context</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">multi_head_attention</span><span class="p">(</span>
-              <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span>
-              <span class="n">transformer</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span>
-              <span class="n">keys</span><span class="p">,</span>
-              <span class="n">values</span><span class="p">,</span>
-              <span class="n">mode</span><span class="p">,</span>
-              <span class="n">values_length</span><span class="o">=</span><span class="n">memory_sequence_length</span><span class="p">,</span>
-              <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attention_dropout</span><span class="p">)</span>
-          <span class="n">context</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">drop_and_add</span><span class="p">(</span>
-              <span class="n">encoded</span><span class="p">,</span>
-              <span class="n">context</span><span class="p">,</span>
-              <span class="n">mode</span><span class="p">,</span>
-              <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;multi_head&quot;</span><span class="p">):</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">multi_head_attention</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span>
+                <span class="n">transformer</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span>
+                <span class="n">memory</span><span class="p">,</span>
+                <span class="n">mode</span><span class="p">,</span>
+                <span class="n">mask</span><span class="o">=</span><span class="n">memory_mask</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attention_dropout</span><span class="p">)</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">drop_and_add</span><span class="p">(</span>
+                <span class="n">encoded</span><span class="p">,</span>
+                <span class="n">context</span><span class="p">,</span>
+                <span class="n">mode</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;ffn&quot;</span><span class="p">):</span>
           <span class="n">transformed</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">feed_forward</span><span class="p">(</span>
@@ -292,9 +340,12 @@
     <span class="k">if</span> <span class="n">sampling_probability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scheduled sampling is not supported with SelfAttentionDecoder&quot;</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_encoder</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">sequence_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">)</span>
+
     <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_self_attention_stack</span><span class="p">(</span>
         <span class="n">inputs</span><span class="p">,</span>
-        <span class="n">sequence_length</span><span class="p">,</span>
+        <span class="n">sequence_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">,</span>
         <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
         <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
         <span class="n">memory_sequence_length</span><span class="o">=</span><span class="n">memory_sequence_length</span><span class="p">)</span>
@@ -320,28 +371,18 @@
     <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">start_tokens</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">lengths</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">log_probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">])</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_cache</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="n">memory_sequence_length</span><span class="p">)</span>
 
-    <span class="n">embedding_fn</span> <span class="o">=</span> <span class="n">get_embedding_fn</span><span class="p">(</span><span class="n">embedding</span><span class="p">)</span>
+    <span class="n">symbols_to_logits_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_to_logits_fn</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_condition</span><span class="p">(</span><span class="n">unused_step</span><span class="p">,</span> <span class="n">finished</span><span class="p">,</span> <span class="n">unused_inputs</span><span class="p">,</span> <span class="n">unused_lengths</span><span class="p">,</span> <span class="n">unused_log_probs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_condition</span><span class="p">(</span><span class="n">unused_step</span><span class="p">,</span> <span class="n">finished</span><span class="p">,</span> <span class="n">unused_inputs</span><span class="p">,</span>
+                   <span class="n">unused_lengths</span><span class="p">,</span> <span class="n">unused_log_probs</span><span class="p">,</span> <span class="n">unused_cache</span><span class="p">):</span>
       <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">finished</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_body</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">finished</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_body</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">finished</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
       <span class="n">inputs_lengths</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
 
-      <span class="c1"># Decode inputs.</span>
-      <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_self_attention_stack</span><span class="p">(</span>
-          <span class="n">embedding_fn</span><span class="p">(</span><span class="n">inputs</span><span class="p">),</span>
-          <span class="n">inputs_lengths</span><span class="p">,</span>
-          <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
-          <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
-          <span class="n">memory_sequence_length</span><span class="o">=</span><span class="n">memory_sequence_length</span><span class="p">)</span>
-
-      <span class="c1"># Only sample the last timestep.</span>
-      <span class="n">last_output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-      <span class="n">logits</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span>
-          <span class="n">last_output</span><span class="p">,</span>
-          <span class="n">vocab_size</span><span class="p">)</span>
+      <span class="n">logits</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="n">symbols_to_logits_fn</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
       <span class="n">probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
       <span class="n">sample_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
@@ -360,18 +401,20 @@
       <span class="k">if</span> <span class="n">maximum_iterations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">next_finished</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">next_finished</span><span class="p">,</span> <span class="n">step</span> <span class="o">&gt;=</span> <span class="n">maximum_iterations</span><span class="p">)</span>
 
-      <span class="k">return</span> <span class="n">step</span><span class="p">,</span> <span class="n">next_finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">next_lengths</span><span class="p">,</span> <span class="n">log_probs</span>
+      <span class="k">return</span> <span class="n">step</span><span class="p">,</span> <span class="n">next_finished</span><span class="p">,</span> <span class="n">next_inputs</span><span class="p">,</span> <span class="n">next_lengths</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">,</span> <span class="n">cache</span>
 
-    <span class="n">step</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">log_probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">while_loop</span><span class="p">(</span>
+    <span class="n">step</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">while_loop</span><span class="p">(</span>
         <span class="n">_condition</span><span class="p">,</span>
         <span class="n">_body</span><span class="p">,</span>
-        <span class="n">loop_vars</span><span class="o">=</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">finished</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">),</span>
+        <span class="n">loop_vars</span><span class="o">=</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">finished</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">,</span> <span class="n">cache</span><span class="p">),</span>
         <span class="n">shape_invariants</span><span class="o">=</span><span class="p">(</span>
             <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([]),</span>
             <span class="n">finished</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span>
             <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]),</span>
             <span class="n">lengths</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span>
-            <span class="n">log_probs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+            <span class="n">log_probs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">cache</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="n">parallel_iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
@@ -397,43 +440,17 @@
                                 <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">PREDICT</span><span class="p">,</span>
                                 <span class="n">memory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">memory_sequence_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">initial_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">initial_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">seq2seq</span><span class="o">.</span><span class="n">tile_batch</span><span class="p">(</span>
-          <span class="n">initial_state</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="n">beam_width</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">memory</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">seq2seq</span><span class="o">.</span><span class="n">tile_batch</span><span class="p">(</span>
-          <span class="n">memory</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="n">beam_width</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">memory_sequence_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">memory_sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">seq2seq</span><span class="o">.</span><span class="n">tile_batch</span><span class="p">(</span>
-          <span class="n">memory_sequence_length</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="n">beam_width</span><span class="p">)</span>
-
-    <span class="n">embedding_fn</span> <span class="o">=</span> <span class="n">get_embedding_fn</span><span class="p">(</span><span class="n">embedding</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_symbols_to_logits_fn</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
-      <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">symbols</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">symbols</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-      <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">step</span><span class="p">)</span>
-      <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_self_attention_stack</span><span class="p">(</span>
-          <span class="n">embedding_fn</span><span class="p">(</span><span class="n">symbols</span><span class="p">),</span>
-          <span class="n">sequence_length</span><span class="p">,</span>
-          <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
-          <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
-          <span class="n">memory_sequence_length</span><span class="o">=</span><span class="n">memory_sequence_length</span><span class="p">)</span>
-
-      <span class="c1"># Only sample the last timestep.</span>
-      <span class="n">last_output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-      <span class="n">logits</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span>
-          <span class="n">last_output</span><span class="p">,</span>
-          <span class="n">vocab_size</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">logits</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_cache</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="n">memory_sequence_length</span><span class="p">)</span>
+    <span class="n">symbols_to_logits_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_to_logits_fn</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
     <span class="n">outputs</span><span class="p">,</span> <span class="n">log_probs</span> <span class="o">=</span> <span class="n">beam_search</span><span class="p">(</span>
-        <span class="n">_symbols_to_logits_fn</span><span class="p">,</span>
+        <span class="n">symbols_to_logits_fn</span><span class="p">,</span>
         <span class="n">start_tokens</span><span class="p">,</span>
         <span class="n">beam_width</span><span class="p">,</span>
         <span class="n">maximum_iterations</span><span class="p">,</span>
         <span class="n">vocab_size</span><span class="p">,</span>
         <span class="n">length_penalty</span><span class="p">,</span>
+        <span class="n">states</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
         <span class="n">eos_id</span><span class="o">=</span><span class="n">end_token</span><span class="p">)</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Ignore &lt;s&gt;.</span>
 
