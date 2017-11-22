@@ -225,7 +225,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>inputs</strong> – The inputs to apply position encoding to.</li>
+<li><strong>inputs</strong> – The inputs of shape <span class="math">\([B, T, D]\)</span>.</li>
 <li><strong>sequence_length</strong> – The length of each sequence of shape <span class="math">\([B]\)</span>.
 If <code class="docutils literal"><span class="pre">None</span></code>, sequences are assumed to have the same length.</li>
 </ul>
@@ -243,12 +243,13 @@ If <code class="docutils literal"><span class="pre">None</span></code>, sequence
 <dt id="opennmt.utils.position.PositionEncoder.apply_one">
 <code class="descname">apply_one</code><span class="sig-paren">(</span><em>inputs</em>, <em>position</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEncoder.apply_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEncoder.apply_one" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply position encoding to one input.</p>
+<p>This is usually used during dynamic decoding.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>inputs</strong> – The inputs to apply position encoding to.</li>
+<li><strong>inputs</strong> – The inputs of shape <span class="math">\([B, 1, D]\)</span>.</li>
 <li><strong>position</strong> – The position to encode.</li>
 </ul>
 </td>
@@ -263,19 +264,19 @@ If <code class="docutils literal"><span class="pre">None</span></code>, sequence
 
 <dl class="method">
 <dt id="opennmt.utils.position.PositionEncoder.encode">
-<code class="descname">encode</code><span class="sig-paren">(</span><em>input_dim</em>, <em>sequence_length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<code class="descname">encode</code><span class="sig-paren">(</span><em>positions</em>, <em>depth</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEncoder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEncoder.encode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates position encodings.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_dim</strong> – The input dimension.</li>
-<li><strong>sequence_length</strong> – The length of each sequence of shape <span class="math">\([B]\)</span>.</li>
+<li><strong>position</strong> – The positions to encode of shape <span class="math">\([B, ...]\)</span>.</li>
+<li><strong>depth</strong> – The encoding depth <span class="math">\(D\)</span>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, T, D]\)</span>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, ..., D]\)</span>.</p>
 </td>
 </tr>
 </tbody>
@@ -283,20 +284,20 @@ If <code class="docutils literal"><span class="pre">None</span></code>, sequence
 </dd></dl>
 
 <dl class="method">
-<dt id="opennmt.utils.position.PositionEncoder.encode_one">
-<code class="descname">encode_one</code><span class="sig-paren">(</span><em>input_dim</em>, <em>position</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEncoder.encode_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEncoder.encode_one" title="Permalink to this definition">¶</a></dt>
-<dd><p>Encodes a single position.</p>
+<dt id="opennmt.utils.position.PositionEncoder.encode_sequence">
+<code class="descname">encode_sequence</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>depth</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEncoder.encode_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEncoder.encode_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates position encodings for sequences.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_dim</strong> – The input dimension.</li>
-<li><strong>position</strong> – The position to encode.</li>
+<li><strong>sequence_length</strong> – The length of each sequence of shape <span class="math">\([B]\)</span>.</li>
+<li><strong>depth</strong> – The encoding depth <span class="math">\(D\)</span>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, D]\)</span>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> of shape <span class="math">\([B, T, D]\)</span>.</p>
 </td>
 </tr>
 </tbody>
@@ -332,12 +333,7 @@ position encodings.</li>
 
 <dl class="method">
 <dt id="opennmt.utils.position.PositionEmbedder.encode">
-<code class="descname">encode</code><span class="sig-paren">(</span><em>input_dim</em>, <em>sequence_length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEmbedder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEmbedder.encode" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="opennmt.utils.position.PositionEmbedder.encode_one">
-<code class="descname">encode_one</code><span class="sig-paren">(</span><em>input_dim</em>, <em>position</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEmbedder.encode_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEmbedder.encode_one" title="Permalink to this definition">¶</a></dt>
+<code class="descname">encode</code><span class="sig-paren">(</span><em>positions</em>, <em>depth</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/position.html#PositionEmbedder.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.position.PositionEmbedder.encode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
