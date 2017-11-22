@@ -173,7 +173,7 @@
 
 <span class="kn">from</span> <span class="nn">opennmt.models.model</span> <span class="k">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">opennmt.utils.misc</span> <span class="k">import</span> <span class="n">count_lines</span><span class="p">,</span> <span class="n">print_bytes</span>
-<span class="kn">from</span> <span class="nn">opennmt.utils.losses</span> <span class="k">import</span> <span class="n">masked_sequence_loss</span>
+<span class="kn">from</span> <span class="nn">opennmt.utils.losses</span> <span class="k">import</span> <span class="n">cross_entropy_sequence_loss</span>
 
 
 <div class="viewcode-block" id="SequenceTagger"><a class="viewcode-back" href="../../../package/opennmt.models.sequence_tagger.html#opennmt.models.sequence_tagger.SequenceTagger">[docs]</a><span class="k">class</span> <span class="nc">SequenceTagger</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
@@ -290,7 +290,7 @@
 
     <span class="k">return</span> <span class="n">logits</span><span class="p">,</span> <span class="n">predictions</span>
 
-  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
     <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_features_length</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crf_decoding</span><span class="p">:</span>
       <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_variable_scope</span><span class="p">(),</span> <span class="n">reuse</span><span class="o">=</span><span class="n">mode</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">):</span>
@@ -300,7 +300,11 @@
             <span class="n">length</span><span class="p">)</span>
       <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="o">-</span><span class="n">log_likelihood</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">masked_sequence_loss</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;tags_id&quot;</span><span class="p">],</span> <span class="n">length</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">cross_entropy_sequence_loss</span><span class="p">(</span>
+          <span class="n">outputs</span><span class="p">,</span>
+          <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;tags_id&quot;</span><span class="p">],</span>
+          <span class="n">length</span><span class="p">,</span>
+          <span class="n">label_smoothing</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;label_smoothing&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
 
   <span class="k">def</span> <span class="nf">_compute_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
     <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_features_length</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>

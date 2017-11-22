@@ -188,9 +188,9 @@
 <span id="opennmt-utils-losses-module"></span><h1>opennmt.utils.losses module<a class="headerlink" href="#module-opennmt.utils.losses" title="Permalink to this headline">¶</a></h1>
 <p>Define losses.</p>
 <dl class="function">
-<dt id="opennmt.utils.losses.masked_sequence_loss">
-<code class="descclassname">opennmt.utils.losses.</code><code class="descname">masked_sequence_loss</code><span class="sig-paren">(</span><em>logits</em>, <em>labels</em>, <em>sequence_length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/losses.html#masked_sequence_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.losses.masked_sequence_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Builds a masked sequence loss.</p>
+<dt id="opennmt.utils.losses.cross_entropy_sequence_loss">
+<code class="descclassname">opennmt.utils.losses.</code><code class="descname">cross_entropy_sequence_loss</code><span class="sig-paren">(</span><em>logits</em>, <em>labels</em>, <em>sequence_length</em>, <em>label_smoothing=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/losses.html#cross_entropy_sequence_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.losses.cross_entropy_sequence_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the reduced cross entropy loss of sequences.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -198,7 +198,30 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>logits</strong> – The unscaled probabilities.</li>
 <li><strong>labels</strong> – The true labels.</li>
-<li><strong>sequence_length</strong> – The size of each sequence.</li>
+<li><strong>sequence_length</strong> – The length of each sequence.</li>
+<li><strong>label_smoothing</strong> – The label smoothing value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The loss.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="opennmt.utils.losses.cross_entropy_loss">
+<code class="descclassname">opennmt.utils.losses.</code><code class="descname">cross_entropy_loss</code><span class="sig-paren">(</span><em>logits</em>, <em>labels</em>, <em>label_smoothing=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/losses.html#cross_entropy_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.losses.cross_entropy_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the reduced cross entropy loss.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>logits</strong> – The unscaled probabilities.</li>
+<li><strong>labels</strong> – The true labels.</li>
+<li><strong>label_smoothing</strong> – The label smoothing value.</li>
 </ul>
 </td>
 </tr>

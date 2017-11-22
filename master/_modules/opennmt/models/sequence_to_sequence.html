@@ -174,7 +174,7 @@
 <span class="kn">import</span> <span class="nn">opennmt.inputters</span> <span class="k">as</span> <span class="nn">inputters</span>
 
 <span class="kn">from</span> <span class="nn">opennmt.models.model</span> <span class="k">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">opennmt.utils.losses</span> <span class="k">import</span> <span class="n">masked_sequence_loss</span>
+<span class="kn">from</span> <span class="nn">opennmt.utils.losses</span> <span class="k">import</span> <span class="n">cross_entropy_sequence_loss</span>
 <span class="kn">from</span> <span class="nn">opennmt.utils.misc</span> <span class="k">import</span> <span class="n">print_bytes</span>
 <span class="kn">from</span> <span class="nn">opennmt.decoders.decoder</span> <span class="k">import</span> <span class="n">get_sampling_probability</span>
 
@@ -381,11 +381,12 @@
 
     <span class="k">return</span> <span class="n">logits</span><span class="p">,</span> <span class="n">predictions</span>
 
-  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">masked_sequence_loss</span><span class="p">(</span>
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">cross_entropy_sequence_loss</span><span class="p">(</span>
         <span class="n">outputs</span><span class="p">,</span>
         <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;ids_out&quot;</span><span class="p">],</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_get_labels_length</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_labels_length</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span>
+        <span class="n">label_smoothing</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;label_smoothing&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
 
 <div class="viewcode-block" id="SequenceToSequence.print_prediction"><a class="viewcode-back" href="../../../package/opennmt.models.sequence_to_sequence.html#opennmt.models.sequence_to_sequence.SequenceToSequence.print_prediction">[docs]</a>  <span class="k">def</span> <span class="nf">print_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">n_best</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n_best&quot;</span><span class="p">)</span>

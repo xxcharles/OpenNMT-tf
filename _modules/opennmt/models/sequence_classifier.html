@@ -172,6 +172,7 @@
 
 <span class="kn">from</span> <span class="nn">opennmt.models.model</span> <span class="k">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">opennmt.utils.misc</span> <span class="k">import</span> <span class="n">count_lines</span><span class="p">,</span> <span class="n">print_bytes</span>
+<span class="kn">from</span> <span class="nn">opennmt.utils.losses</span> <span class="k">import</span> <span class="n">cross_entropy_loss</span>
 
 
 <div class="viewcode-block" id="SequenceClassifier"><a class="viewcode-back" href="../../../package/opennmt.models.sequence_classifier.html#opennmt.models.sequence_classifier.SequenceClassifier">[docs]</a><span class="k">class</span> <span class="nc">SequenceClassifier</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
@@ -264,8 +265,11 @@
 
     <span class="k">return</span> <span class="n">logits</span><span class="p">,</span> <span class="n">predictions</span>
 
-  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">sparse_softmax_cross_entropy</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="s2">&quot;classes_id&quot;</span><span class="p">],</span> <span class="n">outputs</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">cross_entropy_loss</span><span class="p">(</span>
+        <span class="n">outputs</span><span class="p">,</span>
+        <span class="n">labels</span><span class="p">[</span><span class="s2">&quot;classes_id&quot;</span><span class="p">],</span>
+        <span class="n">label_smoothing</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;label_smoothing&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
 
   <span class="k">def</span> <span class="nf">_compute_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">{</span>
