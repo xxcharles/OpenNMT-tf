@@ -303,6 +303,7 @@
                          <span class="n">queries</span><span class="p">,</span>
                          <span class="n">memory</span><span class="p">,</span>
                          <span class="n">mode</span><span class="p">,</span>
+                         <span class="n">num_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
@@ -314,6 +315,8 @@
 <span class="sd">    queries: The sequence of queries. A tensor of shape :math:`[B, T_1, ...]`.</span>
 <span class="sd">    memory: The sequence to attend. A tensor of shape :math:`[B, T_2, ...]`.</span>
 <span class="sd">    mode: A ``tf.estimator.ModeKeys`` mode.</span>
+<span class="sd">    num_units: The number of hidden units. If not set, it is set to the input</span>
+<span class="sd">      dimension.</span>
 <span class="sd">    mask: A float ``tf.Tensor`` applied to the dot product.</span>
 <span class="sd">    cache: A dictionary containing pre-projected keys and values.</span>
 <span class="sd">    dropout: The probability to drop units from the inputs.</span>
@@ -321,15 +324,15 @@
 <span class="sd">  Returns:</span>
 <span class="sd">    The concatenated attention context of each head.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">input_dim</span> <span class="o">=</span> <span class="n">queries</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">num_units</span> <span class="o">=</span> <span class="n">num_units</span> <span class="ow">or</span> <span class="n">queries</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-  <span class="k">if</span> <span class="n">input_dim</span> <span class="o">%</span> <span class="n">num_heads</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multi head attention requires the input dimension to be a&quot;</span>
+  <span class="k">if</span> <span class="n">num_units</span> <span class="o">%</span> <span class="n">num_heads</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multi head attention requires that num_units is a&quot;</span>
                      <span class="s2">&quot; multiple of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_heads</span><span class="p">))</span>
 
-  <span class="n">queries</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-  <span class="n">memory</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="n">input_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-  <span class="n">keys</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="p">[</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+  <span class="n">queries</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">num_units</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">memory</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="n">num_units</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">keys</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span> <span class="p">[</span><span class="n">num_units</span><span class="p">,</span> <span class="n">num_units</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">cache</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">],</span> <span class="n">keys</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -351,8 +354,8 @@
 
   <span class="c1"># Concatenate all heads output.</span>
   <span class="n">combined</span> <span class="o">=</span> <span class="n">combine_heads</span><span class="p">(</span><span class="n">heads</span><span class="p">)</span>
-  <span class="n">combined</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">))</span>
-  <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">combined</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">combined</span><span class="o">.</span><span class="n">set_shape</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">num_units</span><span class="p">))</span>
+  <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">conv1d</span><span class="p">(</span><span class="n">combined</span><span class="p">,</span> <span class="n">num_units</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">outputs</span></div>
 
@@ -406,7 +409,12 @@
       <span class="n">outputs</span><span class="p">,</span>
       <span class="n">rate</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
       <span class="n">training</span><span class="o">=</span><span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">)</span>
-  <span class="n">outputs</span> <span class="o">+=</span> <span class="n">inputs</span>
+
+  <span class="n">input_dim</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">output_dim</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">input_dim</span> <span class="o">==</span> <span class="n">output_dim</span><span class="p">:</span>
+    <span class="n">outputs</span> <span class="o">+=</span> <span class="n">inputs</span>
   <span class="k">return</span> <span class="n">outputs</span></div>
 </pre></div>
 

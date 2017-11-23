@@ -318,7 +318,7 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 
 <dl class="function">
 <dt id="opennmt.utils.transformer.multi_head_attention">
-<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">multi_head_attention</code><span class="sig-paren">(</span><em>num_heads</em>, <em>queries</em>, <em>memory</em>, <em>mode</em>, <em>mask=None</em>, <em>cache=None</em>, <em>dropout=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#multi_head_attention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.multi_head_attention" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">multi_head_attention</code><span class="sig-paren">(</span><em>num_heads</em>, <em>queries</em>, <em>memory</em>, <em>mode</em>, <em>num_units=None</em>, <em>mask=None</em>, <em>cache=None</em>, <em>dropout=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#multi_head_attention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.multi_head_attention" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the multi-head attention as described in
 <a class="reference external" href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -330,6 +330,8 @@ in <a class="reference external" href="https://arxiv.org/abs/1706.03762">https:/
 <li><strong>queries</strong> – The sequence of queries. A tensor of shape <span class="math">\([B, T_1, ...]\)</span>.</li>
 <li><strong>memory</strong> – The sequence to attend. A tensor of shape <span class="math">\([B, T_2, ...]\)</span>.</li>
 <li><strong>mode</strong> – A <code class="docutils literal"><span class="pre">tf.estimator.ModeKeys</span></code> mode.</li>
+<li><strong>num_units</strong> – The number of hidden units. If not set, it is set to the input
+dimension.</li>
 <li><strong>mask</strong> – A float <code class="docutils literal"><span class="pre">tf.Tensor</span></code> applied to the dot product.</li>
 <li><strong>cache</strong> – A dictionary containing pre-projected keys and values.</li>
 <li><strong>dropout</strong> – The probability to drop units from the inputs.</li>
