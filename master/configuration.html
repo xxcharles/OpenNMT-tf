@@ -101,7 +101,10 @@
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#model">Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameters">Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-configuration-files">Multiple configuration files</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="training.html">Training</a></li>
@@ -186,12 +189,19 @@
 <div class="section" id="parameters">
 <span id="parameters"></span><h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
 <p>Parameters are described in separate YAML files. They define data files, optimization settings, dynamic model parameters, and options related to training and inference.</p>
+<p><em>See the example configuration <code class="docutils literal"><span class="pre">config/sample.yml</span></code> to learn about available parameters.</em></p>
+<div class="section" id="multiple-configuration-files">
+<span id="multiple-configuration-files"></span><h3>Multiple configuration files<a class="headerlink" href="#multiple-configuration-files" title="Permalink to this headline">¶</a></h3>
 <p>The command line accepts multiple configuration files so that some parts can be made reusable, e.g:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>python -m bin.main <span class="o">[</span>...<span class="o">]</span> --config config/opennmt-defaults.yml config/optim/adam_with_decay.yml config/data/toy-ende.yml
 </pre></div>
 </div>
 <p>If a configuration key is duplicated, the value defined in the rightmost configuration file has priority.</p>
-<p><em>See the example configuration <code class="docutils literal"><span class="pre">config/sample.yml</span></code> to learn about available parameters.</em></p>
+<p>If you are unsure about the configuration that is actually used or simply prefer working with a single file, consider using the <code class="docutils literal"><span class="pre">merge_config</span></code> script:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python -m bin.merge_config config/opennmt-defaults.yml config/optim/adam_with_decay.yml config/data/toy-ende.yml &gt; config/my_config.yml
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
