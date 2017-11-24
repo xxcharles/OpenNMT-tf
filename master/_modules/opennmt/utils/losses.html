@@ -179,8 +179,8 @@
       <span class="n">on_value</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">label_smoothing</span><span class="p">,</span>
       <span class="n">off_value</span><span class="o">=</span><span class="n">label_smoothing</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">num_classes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
-<span class="k">def</span> <span class="nf">_softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">):</span>
-  <span class="k">if</span> <span class="n">label_smoothing</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span> <span class="ow">and</span> <span class="n">label_smoothing</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
     <span class="n">smoothed_labels</span> <span class="o">=</span> <span class="n">_smooth_one_hot_labels</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span>
         <span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">smoothed_labels</span><span class="p">)</span>
@@ -191,7 +191,8 @@
 <div class="viewcode-block" id="cross_entropy_sequence_loss"><a class="viewcode-back" href="../../../package/opennmt.utils.losses.html#opennmt.utils.losses.cross_entropy_sequence_loss">[docs]</a><span class="k">def</span> <span class="nf">cross_entropy_sequence_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span>
                                 <span class="n">labels</span><span class="p">,</span>
                                 <span class="n">sequence_length</span><span class="p">,</span>
-                                <span class="n">label_smoothing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+                                <span class="n">label_smoothing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                                <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Computes the reduced cross entropy loss of sequences.</span>
 
 <span class="sd">  Args:</span>
@@ -199,27 +200,32 @@
 <span class="sd">    labels: The true labels.</span>
 <span class="sd">    sequence_length: The length of each sequence.</span>
 <span class="sd">    label_smoothing: The label smoothing value.</span>
+<span class="sd">    mode: A ``tf.estimator.ModeKeys`` mode.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    The loss.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">cross_entropy</span> <span class="o">=</span> <span class="n">_softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">)</span>
+  <span class="n">cross_entropy</span> <span class="o">=</span> <span class="n">_softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
   <span class="n">weights</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
   <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">cross_entropy</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">loss</span></div>
 
-<div class="viewcode-block" id="cross_entropy_loss"><a class="viewcode-back" href="../../../package/opennmt.utils.losses.html#opennmt.utils.losses.cross_entropy_loss">[docs]</a><span class="k">def</span> <span class="nf">cross_entropy_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<div class="viewcode-block" id="cross_entropy_loss"><a class="viewcode-back" href="../../../package/opennmt.utils.losses.html#opennmt.utils.losses.cross_entropy_loss">[docs]</a><span class="k">def</span> <span class="nf">cross_entropy_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span>
+                       <span class="n">labels</span><span class="p">,</span>
+                       <span class="n">label_smoothing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                       <span class="n">mode</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Computes the reduced cross entropy loss.</span>
 
 <span class="sd">  Args:</span>
 <span class="sd">    logits: The unscaled probabilities.</span>
 <span class="sd">    labels: The true labels.</span>
 <span class="sd">    label_smoothing: The label smoothing value.</span>
+<span class="sd">    mode: A ``tf.estimator.ModeKeys`` mode.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    The loss.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">cross_entropy</span> <span class="o">=</span> <span class="n">_softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">)</span>
+  <span class="n">cross_entropy</span> <span class="o">=</span> <span class="n">_softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
   <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">cross_entropy</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">loss</span></div>
 </pre></div>
