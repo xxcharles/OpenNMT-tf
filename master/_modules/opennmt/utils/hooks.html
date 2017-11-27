@@ -250,8 +250,8 @@
 <span class="sd">      model: The model for which to save the evaluation predictions.</span>
 <span class="sd">      output_file: The output filename which will be suffixed by the current</span>
 <span class="sd">        training step.</span>
-<span class="sd">      post_evaluation_fn: (optional) A callable that takes as argument the file</span>
-<span class="sd">        with the saved predictions.</span>
+<span class="sd">      post_evaluation_fn: (optional) A callable that takes as argument the</span>
+<span class="sd">        current step and the file with the saved predictions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_file</span> <span class="o">=</span> <span class="n">output_file</span>
@@ -269,8 +269,8 @@
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunArgs</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_global_step</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="SaveEvaluationPredictionHook.after_run"><a class="viewcode-back" href="../../../package/opennmt.utils.hooks.html#opennmt.utils.hooks.SaveEvaluationPredictionHook.after_run">[docs]</a>  <span class="k">def</span> <span class="nf">after_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_context</span><span class="p">,</span> <span class="n">run_values</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
-    <span class="n">predictions</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">run_values</span><span class="o">.</span><span class="n">results</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_file</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+    <span class="n">predictions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_step</span> <span class="o">=</span> <span class="n">run_values</span><span class="o">.</span><span class="n">results</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_step</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="n">misc</span><span class="o">.</span><span class="n">extract_batches</span><span class="p">(</span><span class="n">predictions</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">print_prediction</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span></div>
@@ -278,7 +278,7 @@
 <div class="viewcode-block" id="SaveEvaluationPredictionHook.end"><a class="viewcode-back" href="../../../package/opennmt.utils.hooks.html#opennmt.utils.hooks.SaveEvaluationPredictionHook.end">[docs]</a>  <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
     <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Evaluation predictions saved to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_evaluation_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_post_evaluation_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">)</span></div></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_post_evaluation_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
