@@ -176,6 +176,7 @@ pip install recommonmark
 <div class="section" id="register-sources-for-autodoc">
 <span id="register-sources-for-autodoc"></span><h2>Register sources for autodoc<a class="headerlink" href="#register-sources-for-autodoc" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># To run only if a Python source file is added, removed, or renamed.</span>
+rm -f docs/package/*
 sphinx-apidoc -e -M -o docs/package opennmt opennmt/tests
 </pre></div>
 </div>
