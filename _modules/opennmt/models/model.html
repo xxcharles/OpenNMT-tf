@@ -308,7 +308,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      The initializer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="n">param_init</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;param_init&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">param_init</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_uniform_initializer</span><span class="p">(</span><span class="n">minval</span><span class="o">=-</span><span class="n">param_init</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="n">param_init</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">None</span>
 
   <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
