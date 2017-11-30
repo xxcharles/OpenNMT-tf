@@ -189,7 +189,7 @@
 <p>Define losses.</p>
 <dl class="function">
 <dt id="opennmt.utils.losses.cross_entropy_sequence_loss">
-<code class="descclassname">opennmt.utils.losses.</code><code class="descname">cross_entropy_sequence_loss</code><span class="sig-paren">(</span><em>logits</em>, <em>labels</em>, <em>sequence_length</em>, <em>label_smoothing=0.0</em>, <em>mode='train'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/losses.html#cross_entropy_sequence_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.losses.cross_entropy_sequence_loss" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.utils.losses.</code><code class="descname">cross_entropy_sequence_loss</code><span class="sig-paren">(</span><em>logits</em>, <em>labels</em>, <em>sequence_length</em>, <em>label_smoothing=0.0</em>, <em>average_in_time=False</em>, <em>mode='train'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/losses.html#cross_entropy_sequence_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.losses.cross_entropy_sequence_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the reduced cross entropy loss of sequences.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -200,6 +200,7 @@
 <li><strong>labels</strong> – The true labels.</li>
 <li><strong>sequence_length</strong> – The length of each sequence.</li>
 <li><strong>label_smoothing</strong> – The label smoothing value.</li>
+<li><strong>average_in_time</strong> – If <code class="docutils literal"><span class="pre">True</span></code>, also average the loss in the time dimension.</li>
 <li><strong>mode</strong> – A <code class="docutils literal"><span class="pre">tf.estimator.ModeKeys</span></code> mode.</li>
 </ul>
 </td>
