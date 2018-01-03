@@ -241,6 +241,23 @@
 
 </dd></dl>
 
+<dl class="class">
+<dt id="opennmt.utils.evaluator.BLEUDetokEvaluator">
+<em class="property">class </em><code class="descclassname">opennmt.utils.evaluator.</code><code class="descname">BLEUDetokEvaluator</code><span class="sig-paren">(</span><em>labels_file=None</em>, <em>output_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/evaluator.html#BLEUDetokEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.evaluator.BLEUDetokEvaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#opennmt.utils.evaluator.BLEUEvaluator" title="opennmt.utils.evaluator.BLEUEvaluator"><code class="xref py py-class docutils literal"><span class="pre">opennmt.utils.evaluator.BLEUEvaluator</span></code></a></p>
+<p>Evaluator applying a simple tokenization before calling multi-bleu.perl.</p>
+<dl class="method">
+<dt id="opennmt.utils.evaluator.BLEUDetokEvaluator.name">
+<code class="descname">name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/evaluator.html#BLEUDetokEvaluator.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.evaluator.BLEUDetokEvaluator.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="opennmt.utils.evaluator.BLEUDetokEvaluator.score">
+<code class="descname">score</code><span class="sig-paren">(</span><em>labels_file</em>, <em>predictions_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/evaluator.html#BLEUDetokEvaluator.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.evaluator.BLEUDetokEvaluator.score" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="opennmt.utils.evaluator.external_evaluation_fn">
 <code class="descclassname">opennmt.utils.evaluator.</code><code class="descname">external_evaluation_fn</code><span class="sig-paren">(</span><em>evaluators_name</em>, <em>labels_file</em>, <em>output_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/evaluator.html#external_evaluation_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.evaluator.external_evaluation_fn" title="Permalink to this definition">¶</a></dt>
@@ -314,6 +331,7 @@ more external evaluators.</p>
     <div class="rst-other-versions">
         <dl>
             <dt>Branches</dt>
+            <dd><a href="../../advanced-tokenization/package/opennmt.utils.evaluator.html">advanced-tokenization</a></dd>
             <dd><a href="opennmt.utils.evaluator.html">master</a></dd>
         </dl>
     </div>

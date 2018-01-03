@@ -177,6 +177,13 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">from</span> <span class="nn">tensorflow.python.summary.writer.writer_cache</span> <span class="k">import</span> <span class="n">FileWriterCache</span> <span class="k">as</span> <span class="n">SummaryWriterCache</span>
+<span class="kn">from</span> <span class="nn">opennmt</span> <span class="k">import</span> <span class="n">tokenizers</span>
+
+
+<span class="k">def</span> <span class="nf">_word_level_tokenization</span><span class="p">(</span><span class="n">input_filename</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">):</span>
+  <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizers</span><span class="o">.</span><span class="n">OpenNMTTokenizer</span><span class="p">()</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+    <span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize_stream</span><span class="p">(</span><span class="n">input_stream</span><span class="o">=</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_stream</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ExternalEvaluator"><a class="viewcode-back" href="../../../package/opennmt.utils.evaluator.html#opennmt.utils.evaluator.ExternalEvaluator">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
@@ -250,6 +257,26 @@
       <span class="k">return</span> <span class="kc">None</span></div></div>
 
 
+<div class="viewcode-block" id="BLEUDetokEvaluator"><a class="viewcode-back" href="../../../package/opennmt.utils.evaluator.html#opennmt.utils.evaluator.BLEUDetokEvaluator">[docs]</a><span class="k">class</span> <span class="nc">BLEUDetokEvaluator</span><span class="p">(</span><span class="n">BLEUEvaluator</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Evaluator applying a simple tokenization before calling multi-bleu.perl.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tokenizers</span><span class="p">,</span> <span class="s2">&quot;OpenNMTTokenizer&quot;</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The BLEU-detok evaluator only works when the OpenNMT tokenizer &quot;</span>
+                         <span class="s2">&quot;is available. Please re-check its installation.&quot;</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BLEUDetokEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">labels_file</span><span class="o">=</span><span class="n">labels_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BLEUDetokEvaluator.name"><a class="viewcode-back" href="../../../package/opennmt.utils.evaluator.html#opennmt.utils.evaluator.BLEUDetokEvaluator.name">[docs]</a>  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;BLEU-detok&quot;</span></div>
+
+<div class="viewcode-block" id="BLEUDetokEvaluator.score"><a class="viewcode-back" href="../../../package/opennmt.utils.evaluator.html#opennmt.utils.evaluator.BLEUDetokEvaluator.score">[docs]</a>  <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels_file</span><span class="p">,</span> <span class="n">predictions_path</span><span class="p">):</span>
+    <span class="n">tok_labels_file</span> <span class="o">=</span> <span class="n">labels_file</span> <span class="o">+</span> <span class="s2">&quot;.light_tok&quot;</span>
+    <span class="n">tok_predictions_path</span> <span class="o">=</span> <span class="n">predictions_path</span> <span class="o">+</span> <span class="s2">&quot;.light_tok&quot;</span>
+    <span class="n">_word_level_tokenization</span><span class="p">(</span><span class="n">labels_file</span><span class="p">,</span> <span class="n">tok_labels_file</span><span class="p">)</span>
+    <span class="n">_word_level_tokenization</span><span class="p">(</span><span class="n">predictions_path</span><span class="p">,</span> <span class="n">tok_predictions_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BLEUDetokEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">tok_labels_file</span><span class="p">,</span> <span class="n">tok_predictions_path</span><span class="p">)</span></div></div>
+
+
 <div class="viewcode-block" id="external_evaluation_fn"><a class="viewcode-back" href="../../../package/opennmt.utils.evaluator.html#opennmt.utils.evaluator.external_evaluation_fn">[docs]</a><span class="k">def</span> <span class="nf">external_evaluation_fn</span><span class="p">(</span><span class="n">evaluators_name</span><span class="p">,</span> <span class="n">labels_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Returns a callable to be used in</span>
 <span class="sd">  :class:`opennmt.utils.hooks.SaveEvaluationPredictionHook` that calls one or</span>
@@ -278,6 +305,8 @@
     <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;bleu&quot;</span><span class="p">:</span>
       <span class="n">evaluator</span> <span class="o">=</span> <span class="n">BLEUEvaluator</span><span class="p">(</span><span class="n">labels_file</span><span class="o">=</span><span class="n">labels_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;bleu-detok&quot;</span><span class="p">:</span>
+      <span class="n">evaluator</span> <span class="o">=</span> <span class="n">BLEUDetokEvaluator</span><span class="p">(</span><span class="n">labels_file</span><span class="o">=</span><span class="n">labels_file</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No evaluator associated with the name: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
     <span class="n">evaluators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evaluator</span><span class="p">)</span>
@@ -323,6 +352,7 @@
     <div class="rst-other-versions">
         <dl>
             <dt>Branches</dt>
+            <dd><a href="../../../advanced-tokenization/index.html">advanced-tokenization</a></dd>
             <dd><a href="../../../master/_modules/opennmt/utils/evaluator.html">master</a></dd>
         </dl>
     </div>
