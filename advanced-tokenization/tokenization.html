@@ -185,17 +185,21 @@
 <div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install build-essential gcc cmake libboost-python-dev
 </pre></div>
 </div>
-<p>1. Compile the tokenizer plugin:</p>
+<p>1. Fetch the Tokenizer plugin under OpenNMT-tf repository:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git submodule update --init
+</pre></div>
+</div>
+<p>2. Compile the tokenizer plugin:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
 cmake .. <span class="o">&amp;&amp;</span> make
 <span class="nb">cd</span> ..
 </pre></div>
 </div>
-<p>2. Configure your environment for Python to find the newly generated package:</p>
+<p>3. Configure your environment for Python to find the newly generated package:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PYTHONPATH</span><span class="s2">:</span><span class="nv">$HOME</span><span class="s2">/OpenNMT-tf/build/third_party/OpenNMTTokenizer/bindings/python/&quot;</span>
 </pre></div>
 </div>
-<p>3. Test the plugin:</p>
+<p>4. Test the plugin:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ <span class="nb">echo</span> <span class="s2">&quot;Hello world!&quot;</span> <span class="p">|</span> python -m bin.tokenize_text --tokenizer OpenNMTTokenizer
 Hello world !
 </pre></div>
