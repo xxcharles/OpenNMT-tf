@@ -620,12 +620,7 @@
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">:</span>
       <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">repeat</span><span class="p">()</span>
 
-    <span class="n">iterator</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">make_initializable_iterator</span><span class="p">()</span>
-
-    <span class="c1"># Add the initializer to a standard collection for it to be initialized.</span>
-    <span class="n">tf</span><span class="o">.</span><span class="n">add_to_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TABLE_INITIALIZERS</span><span class="p">,</span> <span class="n">iterator</span><span class="o">.</span><span class="n">initializer</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_next</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">dataset</span>
 
 <div class="viewcode-block" id="Model.input_fn"><a class="viewcode-back" href="../../../package/opennmt.models.model.html#opennmt.models.model.Model.input_fn">[docs]</a>  <span class="k">def</span> <span class="nf">input_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                <span class="n">mode</span><span class="p">,</span>
@@ -747,6 +742,7 @@
         <dl>
             <dt>Branches</dt>
             <dd><a href="../../../master/_modules/opennmt/models/model.html">master</a></dd>
+            <dd><a href="../../../tf-1.5/index.html">tf-1.5</a></dd>
         </dl>
     </div>
 </div>
