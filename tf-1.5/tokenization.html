@@ -215,7 +215,7 @@ python -m bin.build_vocab --tokenizer OpenNMTTokenizer --tokenizer_config config
 </pre></div>
 </div>
 <p><em>The text files are only given as examples and are not part of the repository.</em></p>
-<p>2. Update your model's <code class="docutils literal"><span class="pre">TextInputter</span></code>s to use the custom tokenizer, e.g.:</p>
+<p>2. Update your model’s <code class="docutils literal"><span class="pre">TextInputter</span></code>s to use the custom tokenizer, e.g.:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">onmt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SequenceToSequence</span><span class="p">(</span>
     <span class="n">source_inputter</span><span class="o">=</span><span class="n">onmt</span><span class="o">.</span><span class="n">inputters</span><span class="o">.</span><span class="n">WordEmbedder</span><span class="p">(</span>
         <span class="n">vocabulary_file_key</span><span class="o">=</span><span class="s2">&quot;source_words_vocabulary&quot;</span><span class="p">,</span>
@@ -241,7 +241,7 @@ python -m bin.build_vocab --tokenizer OpenNMTTokenizer --tokenizer_config config
 <span id="notes"></span><h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>As of now, tokenizers are not part of the exported graph.</li>
-<li>Predictions saved during inference or evaluation are detokenized. Consider using the &quot;BLEU-detok&quot; external evaluator that calls <code class="docutils literal"><span class="pre">multi-bleu-detok.perl</span></code> instead of <code class="docutils literal"><span class="pre">multi-bleu.perl</span></code>.</li>
+<li>Predictions saved during inference or evaluation are detokenized. Consider using the “BLEU-detok” external evaluator that calls <code class="docutils literal"><span class="pre">multi-bleu-detok.perl</span></code> instead of <code class="docutils literal"><span class="pre">multi-bleu.perl</span></code>.</li>
 </ul>
 </div>
 </div>
