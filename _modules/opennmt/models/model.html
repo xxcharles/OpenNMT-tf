@@ -171,7 +171,6 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">six</span>
 
@@ -511,6 +510,18 @@
     <span class="k">return</span> <span class="kc">None</span>
 
   <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+  <span class="k">def</span> <span class="nf">_get_dataset_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the size of the dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      features_file: The file of features.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      The total size.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+  <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
   <span class="k">def</span> <span class="nf">_get_features_builder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features_file</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the recipe to build features.</span>
 
@@ -568,7 +579,16 @@
           <span class="n">feat_padded_shapes_fn</span><span class="p">(),</span> <span class="n">labels_padded_shapes_fn</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">ModeKeys</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">:</span>
-      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">sample_buffer_size</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
+      <span class="c1"># When the sample buffer size is smaller than the dataset size, randomly</span>
+      <span class="c1"># select a shard of the dataset. This ensures that all parts of the</span>
+      <span class="c1"># dataset can be seen when the evaluation frequency is high.</span>
+      <span class="n">dataset_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dataset_size</span><span class="p">(</span><span class="n">features_file</span><span class="p">)</span>
+      <span class="n">num_shards</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">dataset_size</span> <span class="o">//</span> <span class="n">sample_buffer_size</span><span class="p">)</span>  <span class="c1"># Ceil division.</span>
+      <span class="k">if</span> <span class="n">num_shards</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">shard_index</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span>
+            <span class="p">[],</span> <span class="n">minval</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="n">num_shards</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shard</span><span class="p">(</span><span class="n">num_shards</span><span class="p">,</span> <span class="n">shard_index</span><span class="p">)</span>
+      <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">sample_buffer_size</span><span class="p">)</span>
 
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
         <span class="n">process_fn</span><span class="p">,</span>
