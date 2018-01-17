@@ -190,7 +190,7 @@
 <p>Base class for models.</p>
 <dl class="function">
 <dt id="opennmt.models.model.learning_rate_decay_fn">
-<code class="descclassname">opennmt.models.model.</code><code class="descname">learning_rate_decay_fn</code><span class="sig-paren">(</span><em>decay_type</em>, <em>decay_rate</em>, <em>decay_steps</em>, <em>staircase=True</em>, <em>start_decay_steps=0</em>, <em>minimum_learning_rate=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/models/model.html#learning_rate_decay_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.models.model.learning_rate_decay_fn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.models.model.</code><code class="descname">learning_rate_decay_fn</code><span class="sig-paren">(</span><em>decay_type</em>, <em>decay_rate</em>, <em>decay_steps</em>, <em>decay_step_duration=1</em>, <em>staircase=True</em>, <em>start_decay_steps=0</em>, <em>minimum_learning_rate=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/models/model.html#learning_rate_decay_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.models.model.learning_rate_decay_fn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the learning rate decay functions.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -201,6 +201,7 @@
 <a class="reference internal" href="opennmt.utils.decay.html#module-opennmt.utils.decay" title="opennmt.utils.decay"><code class="xref py py-mod docutils literal"><span class="pre">opennmt.utils.decay</span></code></a> as a string.</li>
 <li><strong>decay_rate</strong> – The decay rate to apply.</li>
 <li><strong>decay_steps</strong> – The decay steps as described in the decay type function.</li>
+<li><strong>decay_step_duration</strong> – The number of training steps that make 1 decay step.</li>
 <li><strong>staircase</strong> – If <code class="docutils literal"><span class="pre">True</span></code>, learning rate is decayed in a staircase fashion.</li>
 <li><strong>start_decay_steps</strong> – Start decay after this many steps.</li>
 <li><strong>minimum_learning_rate</strong> – Do not decay past this learning rate value.</li>
@@ -255,7 +256,7 @@ arguments and the returned value.</p>
 
 <dl class="method">
 <dt id="opennmt.models.model.Model.input_fn">
-<code class="descname">input_fn</code><span class="sig-paren">(</span><em>mode</em>, <em>batch_size</em>, <em>prefetch_buffer_size</em>, <em>num_parallel_process_calls</em>, <em>metadata</em>, <em>features_file</em>, <em>labels_file=None</em>, <em>num_buckets=None</em>, <em>sample_buffer_size=None</em>, <em>maximum_features_length=None</em>, <em>maximum_labels_length=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/models/model.html#Model.input_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.models.model.Model.input_fn" title="Permalink to this definition">¶</a></dt>
+<code class="descname">input_fn</code><span class="sig-paren">(</span><em>mode</em>, <em>batch_size</em>, <em>prefetch_buffer_size</em>, <em>num_parallel_process_calls</em>, <em>metadata</em>, <em>features_file</em>, <em>labels_file=None</em>, <em>batch_type='examples'</em>, <em>bucket_width=None</em>, <em>sample_buffer_size=None</em>, <em>maximum_features_length=None</em>, <em>maximum_labels_length=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/models/model.html#Model.input_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.models.model.Model.input_fn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an input pipeline.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -270,7 +271,10 @@ arguments and the returned value.</p>
 by the user.</li>
 <li><strong>features_file</strong> – The file containing input features.</li>
 <li><strong>labels_file</strong> – The file containing output labels.</li>
-<li><strong>num_buckets</strong> – The number of buckets to store examples of similar sizes.</li>
+<li><strong>batch_type</strong> – The training batching stragety to use: can be “examples” or
+“tokens”.</li>
+<li><strong>bucket_width</strong> – The width of the length buckets to select batch candidates
+from. <code class="docutils literal"><span class="pre">None</span></code> to not constrain batch formation.</li>
 <li><strong>sample_buffer_size</strong> – The number of elements from which to sample.</li>
 <li><strong>maximum_features_length</strong> – The maximum length or list of maximum lengths of
 the features sequence(s). <code class="docutils literal"><span class="pre">None</span></code> to not constrain the length.</li>
