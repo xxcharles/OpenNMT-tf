@@ -271,9 +271,6 @@
   <span class="k">def</span> <span class="nf">_get_labels_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_inputter</span><span class="o">.</span><span class="n">get_length</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_get_dataset_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features_file</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_inputter</span><span class="o">.</span><span class="n">get_dataset_size</span><span class="p">(</span><span class="n">features_file</span><span class="p">)</span>
-
   <span class="k">def</span> <span class="nf">_get_features_builder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features_file</span><span class="p">):</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_inputter</span><span class="o">.</span><span class="n">make_dataset</span><span class="p">(</span><span class="n">features_file</span><span class="p">)</span>
     <span class="n">process_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_inputter</span><span class="o">.</span><span class="n">process</span>
@@ -442,6 +439,7 @@
         <dl>
             <dt>Branches</dt>
             <dd><a href="sequence_to_sequence.html">master</a></dd>
+            <dd><a href="../../../../revert-48-dataset-shards/index.html">revert-48-dataset-shards</a></dd>
             <dd><a href="../../../../tf-1.5/index.html">tf-1.5</a></dd>
         </dl>
     </div>

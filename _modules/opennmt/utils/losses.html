@@ -213,12 +213,11 @@
   <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">cross_entropy</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span>
   <span class="n">normalized_loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
 
-  <span class="c1"># Summarize the normalized loss for better interpretability.</span>
-  <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s2">&quot;normalized_loss&quot;</span><span class="p">,</span> <span class="n">normalized_loss</span><span class="p">)</span>
-
   <span class="k">if</span> <span class="n">average_in_time</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">normalized_loss</span>
   <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Summarize the normalized loss for better interpretability.</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s2">&quot;normalized_loss&quot;</span><span class="p">,</span> <span class="n">normalized_loss</span><span class="p">)</span>
     <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">logits</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">loss</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span></div>
 
@@ -277,6 +276,7 @@
         <dl>
             <dt>Branches</dt>
             <dd><a href="../../../master/_modules/opennmt/utils/losses.html">master</a></dd>
+            <dd><a href="../../../revert-48-dataset-shards/index.html">revert-48-dataset-shards</a></dd>
             <dd><a href="../../../tf-1.5/index.html">tf-1.5</a></dd>
         </dl>
     </div>

@@ -204,9 +204,6 @@
 <div class="viewcode-block" id="SequenceRecordInputter.make_dataset"><a class="viewcode-back" href="../../../package/opennmt.inputters.record_inputter.html#opennmt.inputters.record_inputter.SequenceRecordInputter.make_dataset">[docs]</a>  <span class="k">def</span> <span class="nf">make_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_file</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">TFRecordDataset</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SequenceRecordInputter.get_dataset_size"><a class="viewcode-back" href="../../../package/opennmt.inputters.record_inputter.html#opennmt.inputters.record_inputter.SequenceRecordInputter.get_dataset_size">[docs]</a>  <span class="k">def</span> <span class="nf">get_dataset_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_file</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">python_io</span><span class="o">.</span><span class="n">tf_record_iterator</span><span class="p">(</span><span class="n">data_file</span><span class="p">))</span></div>
-
   <span class="k">def</span> <span class="nf">_get_serving_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">receiver_tensors</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;tensor&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_depth</span><span class="p">)),</span>
@@ -277,6 +274,7 @@
         <dl>
             <dt>Branches</dt>
             <dd><a href="../../../master/_modules/opennmt/inputters/record_inputter.html">master</a></dd>
+            <dd><a href="../../../revert-48-dataset-shards/index.html">revert-48-dataset-shards</a></dd>
             <dd><a href="../../../tf-1.5/index.html">tf-1.5</a></dd>
         </dl>
     </div>
