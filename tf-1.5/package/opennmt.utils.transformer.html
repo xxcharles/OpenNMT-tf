@@ -211,7 +211,7 @@
 
 <dl class="function">
 <dt id="opennmt.utils.transformer.build_sequence_mask">
-<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">build_sequence_mask</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>num_heads=None</em>, <em>dtype=tf.float32</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#build_sequence_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.build_sequence_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">build_sequence_mask</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>num_heads=None</em>, <em>maximum_length=None</em>, <em>dtype=tf.float32</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#build_sequence_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.build_sequence_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the dot product mask.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -220,6 +220,8 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sequence_length</strong> – The sequence length.</li>
 <li><strong>num_heads</strong> – The number of heads.</li>
+<li><strong>maximum_length</strong> – Optional size of the returned time dimension. Otherwise
+it is the maximum of <code class="xref py py-obj docutils literal"><span class="pre">sequence_length</span></code>.</li>
 <li><strong>dtype</strong> – The type of the mask tensor.</li>
 </ul>
 </td>
@@ -234,7 +236,7 @@
 
 <dl class="function">
 <dt id="opennmt.utils.transformer.build_future_mask">
-<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">build_future_mask</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>num_heads=None</em>, <em>dtype=tf.float32</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#build_future_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.build_future_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">opennmt.utils.transformer.</code><code class="descname">build_future_mask</code><span class="sig-paren">(</span><em>sequence_length</em>, <em>num_heads=None</em>, <em>maximum_length=None</em>, <em>dtype=tf.float32</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opennmt/utils/transformer.html#build_future_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opennmt.utils.transformer.build_future_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the dot product mask for future positions.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -243,6 +245,8 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sequence_length</strong> – The sequence length.</li>
 <li><strong>num_heads</strong> – The number of heads.</li>
+<li><strong>maximum_length</strong> – Optional size of the returned time dimension. Otherwise
+it is the maximum of <code class="xref py py-obj docutils literal"><span class="pre">sequence_length</span></code>.</li>
 <li><strong>dtype</strong> – The type of the mask tensor.</li>
 </ul>
 </td>

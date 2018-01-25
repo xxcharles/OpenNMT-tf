@@ -177,7 +177,7 @@
 <span class="kn">from</span> <span class="nn">opennmt.utils.reducer</span> <span class="k">import</span> <span class="n">SumReducer</span>
 
 
-<div class="viewcode-block" id="make_positions"><a class="viewcode-back" href="../../../package/opennmt.utils.position.html#opennmt.utils.position.make_positions">[docs]</a><span class="k">def</span> <span class="nf">make_positions</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">):</span>
+<div class="viewcode-block" id="make_positions"><a class="viewcode-back" href="../../../package/opennmt.utils.position.html#opennmt.utils.position.make_positions">[docs]</a><span class="k">def</span> <span class="nf">make_positions</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">maximum_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Builds a sequence of positions.</span>
 
 <span class="sd">  The first position is 1 as the 0 index is reserved to padding positions.</span>
@@ -185,11 +185,15 @@
 <span class="sd">  Args:</span>
 <span class="sd">    sequence_length: The length of each sequence as a ``tf.Tensor`` of shape</span>
 <span class="sd">      :math:`[B]`.</span>
+<span class="sd">    maximum_length: Optional size of the returned time dimension. Otherwise it</span>
+<span class="sd">      is the maximum of :obj:`sequence_length`.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    The sequence of positions as a ``tf.Tensor`` of shape :math:`[B, T]`.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">maximum_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">maximum_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">maximum_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
+
   <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
   <span class="c1"># Make 0 the position of padding.</span>
@@ -197,8 +201,8 @@
   <span class="n">position</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_size</span><span class="p">])</span>
   <span class="n">position</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
-  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">position</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span>
+      <span class="n">sequence_length</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="n">maximum_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">position</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
   <span class="n">position</span> <span class="o">=</span> <span class="n">position</span> <span class="o">*</span> <span class="n">mask</span>
 
@@ -228,15 +232,17 @@
 <span class="sd">      A ``tf.Tensor`` of shape :math:`[B, T, D]` where :math:`D` depends on the</span>
 <span class="sd">      :attr:`reducer`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">timesteps</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">sequence_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">timesteps</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
       <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">timesteps</span><span class="p">)</span>
 
     <span class="n">input_dim</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s2">&quot;position_encoding&quot;</span><span class="p">):</span>
-      <span class="n">position_encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode_sequence</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">)</span>
+      <span class="n">position_encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode_sequence</span><span class="p">(</span>
+          <span class="n">sequence_length</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">maximum_length</span><span class="o">=</span><span class="n">timesteps</span><span class="p">)</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">([</span><span class="n">inputs</span><span class="p">,</span> <span class="n">position_encoding</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="PositionEncoder.apply_one"><a class="viewcode-back" href="../../../package/opennmt.utils.position.html#opennmt.utils.position.PositionEncoder.apply_one">[docs]</a>  <span class="k">def</span> <span class="nf">apply_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
@@ -275,17 +281,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PositionEncoder.encode_sequence"><a class="viewcode-back" href="../../../package/opennmt.utils.position.html#opennmt.utils.position.PositionEncoder.encode_sequence">[docs]</a>  <span class="k">def</span> <span class="nf">encode_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+<div class="viewcode-block" id="PositionEncoder.encode_sequence"><a class="viewcode-back" href="../../../package/opennmt.utils.position.html#opennmt.utils.position.PositionEncoder.encode_sequence">[docs]</a>  <span class="k">def</span> <span class="nf">encode_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">maximum_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates position encodings for sequences.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      sequence_length: The length of each sequence of shape :math:`[B]`.</span>
 <span class="sd">      depth: The encoding depth :math:`D`.</span>
+<span class="sd">      maximum_length: Optional size of the returned time dimension. Otherwise</span>
+<span class="sd">        it is the maximum of :obj:`sequence_length`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A ``tf.Tensor`` of shape :math:`[B, T, D]`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">positions</span> <span class="o">=</span> <span class="n">make_positions</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">make_positions</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">maximum_length</span><span class="o">=</span><span class="n">maximum_length</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span></div></div>
 
 

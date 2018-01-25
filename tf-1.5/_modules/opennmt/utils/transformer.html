@@ -188,12 +188,17 @@
   <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
   <span class="k">return</span> <span class="n">sequence_length</span></div>
 
-<div class="viewcode-block" id="build_sequence_mask"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.build_sequence_mask">[docs]</a><span class="k">def</span> <span class="nf">build_sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<div class="viewcode-block" id="build_sequence_mask"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.build_sequence_mask">[docs]</a><span class="k">def</span> <span class="nf">build_sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span>
+                        <span class="n">num_heads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">maximum_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Builds the dot product mask.</span>
 
 <span class="sd">  Args:</span>
 <span class="sd">    sequence_length: The sequence length.</span>
 <span class="sd">    num_heads: The number of heads.</span>
+<span class="sd">    maximum_length: Optional size of the returned time dimension. Otherwise</span>
+<span class="sd">      it is the maximum of :obj:`sequence_length`.</span>
 <span class="sd">    dtype: The type of the mask tensor.</span>
 
 <span class="sd">  Returns:</span>
@@ -202,18 +207,23 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">num_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tile_sequence_length</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
-  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+  <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="n">maximum_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
   <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">num_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">2</span><span class="p">]])</span>
   <span class="k">return</span> <span class="n">mask</span></div>
 
-<div class="viewcode-block" id="build_future_mask"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.build_future_mask">[docs]</a><span class="k">def</span> <span class="nf">build_future_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<div class="viewcode-block" id="build_future_mask"><a class="viewcode-back" href="../../../package/opennmt.utils.transformer.html#opennmt.utils.transformer.build_future_mask">[docs]</a><span class="k">def</span> <span class="nf">build_future_mask</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span>
+                      <span class="n">num_heads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">maximum_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Builds the dot product mask for future positions.</span>
 
 <span class="sd">  Args:</span>
 <span class="sd">    sequence_length: The sequence length.</span>
 <span class="sd">    num_heads: The number of heads.</span>
+<span class="sd">    maximum_length: Optional size of the returned time dimension. Otherwise</span>
+<span class="sd">      it is the maximum of :obj:`sequence_length`.</span>
 <span class="sd">    dtype: The type of the mask tensor.</span>
 
 <span class="sd">  Returns:</span>
@@ -222,11 +232,12 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">num_heads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">tile_sequence_length</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
-  <span class="n">max_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">maximum_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">maximum_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">)</span>
   <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span>
       <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span>
-          <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">max_length</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
-          <span class="n">maxlen</span><span class="o">=</span><span class="n">max_length</span><span class="p">,</span>
+          <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">maximum_length</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
+          <span class="n">maxlen</span><span class="o">=</span><span class="n">maximum_length</span><span class="p">,</span>
           <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">),</span>
       <span class="n">sequence_length</span><span class="p">,</span>
       <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
